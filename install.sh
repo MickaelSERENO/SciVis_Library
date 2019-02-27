@@ -17,7 +17,7 @@ ninja install
 cd ../
 
 #Linux x64
-cd android_x86_build
+cd linux_x64_build
 PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/mickael/.local/lib/pkgconfig/ cmake ../ -G Ninja -DCMAKE_INSTALL_PREFIX=/home/mickael/.local/
 ninja install
 cd ../

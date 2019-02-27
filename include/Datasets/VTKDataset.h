@@ -19,8 +19,8 @@ namespace sereno
              * \param ptFieldValues   the point field values to take account of. Must be part of the parser parameter.
              * \param cellFieldValues the cell  field values to take account of. Must be part of the parser parameter.
              */
-            VTKDataset(std::shared_ptr<VTKParser>& parser, const std::vector<VTKFieldValue*>& ptFieldValues, 
-                                     const std::vector<VTKFieldValue*>& cellFieldValues);
+            VTKDataset(std::shared_ptr<VTKParser>& parser, const std::vector<const VTKFieldValue*>& ptFieldValues, 
+                                     const std::vector<const VTKFieldValue*>& cellFieldValues);
 
             /**
              * \brief  Get the VTKParser
@@ -32,11 +32,11 @@ namespace sereno
              * \brief  Get the point field values
              * \return   the VTKFieldValue* objects
              */
-            const std::vector<VTKFieldValue*>& getPtFieldValues() const {return m_ptFieldValues;}
+            const std::vector<const VTKFieldValue*>& getPtFieldValues() const {return m_ptFieldValues;}
         private:
-            std::vector<VTKFieldValue*> m_ptFieldValues;   /*!< The point field values*/
-            std::vector<VTKFieldValue*> m_cellFieldValues; /*!< The cell  field values*/
-            std::shared_ptr<VTKParser>  m_parser;          /*!< The VTK parser*/
+            std::vector<const VTKFieldValue*> m_ptFieldValues;   /*!< The point field values*/
+            std::vector<const VTKFieldValue*> m_cellFieldValues; /*!< The cell  field values*/
+            std::shared_ptr<VTKParser>        m_parser;          /*!< The VTK parser*/
     };
 }
 
