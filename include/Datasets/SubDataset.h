@@ -107,9 +107,6 @@ namespace sereno
             Dataset*    m_parent         = NULL;    /*!< The parent dataset*/
 
 #ifdef SNAPSHOT
-            uint32_t    m_snapshotWidth  = 0;       /*!< The snapshot width*/
-            uint32_t    m_snapshotHeight = 0;       /*!< The snapshot height*/
-
             std::shared_ptr<Snapshot> m_snapshot;   /*!< The snapshot structure*/
 #endif
 
