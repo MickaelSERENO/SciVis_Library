@@ -6,6 +6,7 @@
 #include <memory>
 #include "Quaternion.h"
 #include "ColorMode.h"
+#include <glm/glm.hpp>
 
 #ifdef SNAPSHOT
     #include "Datasets/Snapshot.h"
@@ -73,6 +74,14 @@ namespace sereno
              * \param amp the new amplitude*/
             void setAmplitude(float* amp) {m_amplitude[0] = amp[0]; m_amplitude[1] = amp[1];}
 
+            /* \brief  Get the 3D position of this sub dataset
+             * \return  const reference of the 3D position*/
+            const glm::vec3& getPosition() const {return m_position;}
+
+            /* \brief  Set the 3D position of this sub dataset
+             * \param pos the new 3D position */
+            void setPosition(const glm::vec3& pos) {m_position = pos;}
+
 #ifdef SNAPSHOT
             /**
              * \brief  Set the snapshot from this scientific visualization
@@ -94,6 +103,7 @@ namespace sereno
             float       m_maxClamp       = 1.0f;    /*!< The maximum color clamping (ratio : 0.0f 1.0)*/
             float       m_amplitude[2];             /*!< The dataset amplitude*/
             Quaternionf m_rotation;                 /*!< The quaternion rotation*/
+            glm::vec3   m_position;                 /*!< The small multiple position*/
             Dataset*    m_parent         = NULL;    /*!< The parent dataset*/
 
 #ifdef SNAPSHOT

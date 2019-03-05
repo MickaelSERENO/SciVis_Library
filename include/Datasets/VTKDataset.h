@@ -22,10 +22,8 @@ namespace sereno
             VTKDataset(std::shared_ptr<VTKParser>& parser, const std::vector<const VTKFieldValue*>& ptFieldValues, 
                                      const std::vector<const VTKFieldValue*>& cellFieldValues);
 
-            /**
-             * \brief  Get the VTKParser
-             * \return  the VTKParser object 
-             */
+            /* \brief  Get the Parser containing the dataset data
+             * \return  the VTKParser */
             const std::shared_ptr<VTKParser> getParser() const {return m_parser;}
 
             /**
@@ -33,6 +31,30 @@ namespace sereno
              * \return   the VTKFieldValue* objects
              */
             const std::vector<const VTKFieldValue*>& getPtFieldValues() const {return m_ptFieldValues;}
+
+            /* \brief  Get the indice of the point field value <value> in the Dataset (VTKParser) array
+             * \param value the value to look at
+             * \return  the indice of the value. -1 if not found */
+            int32_t getPtFieldValueIndice(const VTKFieldValue* value) const 
+            {
+                std::vector<const VTKFieldValue*> values = m_parser->getPointFieldValueDescriptors();
+                for(size_t i = 0; i < values.size(); i++)
+                    if(values[i] == value)
+                        return i;
+                return -1;
+            }
+
+            /* \brief  Get the indice of the cell field value <value> in the Dataset (VTKParser) array
+             * \param value the value to look at
+             * \return  the indice of the value. -1 if not found */
+            int32_t getCellFieldValueIndice(const VTKFieldValue* value) const 
+            {
+                std::vector<const VTKFieldValue*> values = m_parser->getCellFieldValueDescriptors();
+                for(size_t i = 0; i < values.size(); i++)
+                    if(values[i] == value)
+                        return i;
+                return -1;
+            }
         private:
             std::vector<const VTKFieldValue*> m_ptFieldValues;   /*!< The point field values*/
             std::vector<const VTKFieldValue*> m_cellFieldValues; /*!< The cell  field values*/

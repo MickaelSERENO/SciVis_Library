@@ -23,7 +23,7 @@ namespace sereno
         uint32_t fileSize = ftell(file);
         if(fileSize-pos != m_size[0]*m_size[1]*m_size[2]*3*sizeof(float))
         {
-            ERROR("the current file may be broken");
+            ERROR << "the current file may be broken\n";
             return;
         }
         fseek(file, pos, SEEK_SET);

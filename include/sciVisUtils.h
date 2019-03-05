@@ -38,73 +38,83 @@
 #define __FILENAME__ (strrchr("/" __FILE__, '/') + 1)
 #endif
 
-#ifndef ERROR
-#define ERROR(x, ...)     (fprintf(stderr, RED "Error : " GRN "%s:%d " RESET x, __FILENAME__, __LINE__, ## __VA_ARGS__))
+//Stringification
+#ifndef STR
+#define STR_(x)  #x
+#define STR(x)   STR_(x)
 #endif
 
-#ifndef WARNING
-#define WARNING(x, ...)   (fprintf(stdout, YEL "Warning : " GRN "%s:%d " RESET x, __FILENAME__, __LINE__, ## __VA_ARGS__))
+//Cat
+#ifndef CAT
+#define CAT_(x, y) x##y
+#define CAT(x, y)  CAT_(x, y)
+#endif
+
+//Log system
+#ifndef ERROR
+#define ERROR   (std::cerr << BOLD RED "Error : "   RESET GRN  << __FILENAME__ << ":" STR(__LINE__) RESET " ")
 #endif
 
 #ifndef INFO
-#define INFO(x, ...)   (fprintf(stdout, BOLD WHT "INFO : " RESET GRN "%s:%d " RESET x , __FILENAME__, __LINE__, ## __VA_ARGS__))
+#define INFO    (std::cout << BOLD WHT "Info : "    RESET GRN  << __FILENAME__ << ":" STR(__LINE__) RESET " ")
 #endif
 
-
+#ifndef WARNING
+#define WARNING (std::cout << BOLD YEL "Warning : " RESET GRN  << __FILENAME__ << ":" STR(__LINE__) RESET " ")
+#endif
 
 namespace serenoSciVis
 {
+    /* \brief Convert a uint8 ptr (4 value) to a uint32_t
+     * \param data the uint8_t ptr
+     * \return the uint32_t */
+    inline uint32_t uint8ToUint32(uint8_t* data)
+    {
+        return (data[0] << 24) + (data[1] << 16) +
+               (data[2] << 8 ) + (data[3]);
+    }
 
-/* \brief Convert a uint8 ptr (4 value) to a uint32_t
- * \param data the uint8_t ptr
- * \return the uint32_t */
-inline uint32_t uint8ToUint32(uint8_t* data)
-{
-    return (data[0] << 24) + (data[1] << 16) +
-           (data[2] << 8 ) + (data[3]);
-}
-
-/* \brief Convert a uint8 ptr (4 value) to a float
- * \param data the uint8_t ptr
- * \return the float */
-inline float uint8ToFloat(uint8_t* data)
-{
-    uint32_t t = uint8ToUint32(data);
-    return *(float*)&t;
-}
+    /* \brief Convert a uint8 ptr (4 value) to a float
+     * \param data the uint8_t ptr
+     * \return the float */
+    inline float uint8ToFloat(uint8_t* data)
+    {
+        uint32_t t = uint8ToUint32(data);
+        return *(float*)&t;
+    }
 
 
 #if __cplusplus > 201703L
-    /**
-     * \brief  Create meta nested for loop. The most outer part of the for loop is at indice==Dim-1 
-     *
-     * @tparam Dim the dimension of the for loop
-     * @tparam Callable the functor class callable
-     * \param start array of where to start along each dimension
-     * \param end array of where to finish along each dimension
-     * \param c the function to call
-     *
-     * \return   
-     */
-    template<size_t Dim, class Callable>
-    constexpr void metaForLoop(const size_t* start, const size_t* end, Callable&& c)
-    {
-        static_assert(Dim > 0);
-
-        for(size_t i = start[Dim]; i != end[Dim]; i++)
+        /**
+         * \brief  Create meta nested for loop. The most outer part of the for loop is at indice==Dim-1 
+         *
+         * @tparam Dim the dimension of the for loop
+         * @tparam Callable the functor class callable
+         * \param start array of where to start along each dimension
+         * \param end array of where to finish along each dimension
+         * \param c the function to call
+         *
+         * \return   
+         */
+        template<size_t Dim, class Callable>
+        constexpr void metaForLoop(const size_t* start, const size_t* end, Callable&& c)
         {
-            if constexpr(Dim == 1)
-                c(i);
-            else
+            static_assert(Dim > 0);
+
+            for(size_t i = start[Dim]; i != end[Dim]; i++)
             {
-                auto bindAnArgument = [i, &c](auto... args)
+                if constexpr(Dim == 1)
+                    c(i);
+                else
                 {
-                    c(i, args...);
-                };
-                meta_for_loop<Dim-1>(begin, end, bindAnArgument);
+                    auto bindAnArgument = [i, &c](auto... args)
+                    {
+                        c(i, args...);
+                    };
+                    meta_for_loop<Dim-1>(begin, end, bindAnArgument);
+                }
             }
         }
-    }
 #endif
 }
 
