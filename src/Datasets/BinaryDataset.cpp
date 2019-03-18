@@ -5,7 +5,7 @@ using namespace serenoSciVis;
 
 namespace sereno
 {
-    BinaryDataset::BinaryDataset(FILE* file) : Dataset()
+    BinaryDataset::BinaryDataset(FILE* file, const std::string& name) : Dataset()
     {
 #define BUFFER_SIZE 3*sizeof(float)*270
         uint8_t buffer[BUFFER_SIZE];
@@ -30,7 +30,7 @@ namespace sereno
         m_velocity = (float*)malloc(3*sizeof(float*)*m_size[0]*m_size[1]*m_size[2]);
 
         //Only one sub dataset available
-        SubDataset* subData = new SubDataset(this);
+        SubDataset* subData = new SubDataset(this, name);
         m_subDatasets.push_back(subData);
 
         //read data
@@ -106,7 +106,11 @@ namespace sereno
         if(file == NULL)
             return NULL;
 
-        BinaryDataset* data = new BinaryDataset(file);
+        std::string filename = path;
+        const size_t lastSlashIdx = filename.find_last_of("\\/");
+        if(std::string::npos != lastSlashIdx)
+            filename.erase(0, lastSlashIdx + 1);
+        BinaryDataset* data = new BinaryDataset(file, filename);
 
         //Check if the data is valid or not
         if(!data->getSubDataset(0)->isValid())

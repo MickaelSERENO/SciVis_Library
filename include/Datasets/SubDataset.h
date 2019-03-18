@@ -7,6 +7,7 @@
 #include "Quaternion.h"
 #include "ColorMode.h"
 #include <glm/glm.hpp>
+#include <string>
 
 #ifdef SNAPSHOT
     #include "Datasets/Snapshot.h"
@@ -20,8 +21,10 @@ namespace sereno
     class SubDataset
     {
         public:
-            /** \brief  Constructor */
-            SubDataset(Dataset* parent);
+            /** \brief  Constructor 
+             * \param parent the parent Dataset
+             * \param name the SUbDataset name*/
+            SubDataset(Dataset* parent, const std::string& name);
 
             virtual ~SubDataset(){}
 
@@ -82,6 +85,10 @@ namespace sereno
              * \param pos the new 3D position */
             void setPosition(const glm::vec3& pos) {m_position = pos;}
 
+            /* \brief  Get the SubDataset name
+             * \return   The SubDataset name */
+            const std::string& getName() {return m_name;}
+
 #ifdef SNAPSHOT
             /**
              * \brief  Set the snapshot from this scientific visualization
@@ -105,6 +112,7 @@ namespace sereno
             Quaternionf m_rotation;                 /*!< The quaternion rotation*/
             glm::vec3   m_position;                 /*!< The small multiple position*/
             Dataset*    m_parent         = NULL;    /*!< The parent dataset*/
+            std::string m_name;                     /*!< The SubDataset name*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot;   /*!< The snapshot structure*/

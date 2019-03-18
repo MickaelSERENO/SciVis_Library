@@ -3,7 +3,7 @@
 
 namespace sereno
 {
-    SubDataset::SubDataset(Dataset* parent) :  m_amplitude{std::numeric_limits<float>::max(), std::numeric_limits<float>::min()}
+    SubDataset::SubDataset(Dataset* parent, const std::string& name) :  m_amplitude{std::numeric_limits<float>::max(), std::numeric_limits<float>::min()}, m_name(name)
     {
         m_parent = parent;
     }

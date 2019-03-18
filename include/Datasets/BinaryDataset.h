@@ -18,8 +18,9 @@ namespace sereno
     {
         public:
             /* \brief Constructor. Read the file defined by dataPath 
-             * \param file the file to read*/
-            BinaryDataset(FILE* file);
+             * \param file the file to read
+             * \param name the BinaryDataset name*/
+            BinaryDataset(FILE* file, const std::string& name);
 
             /* \brief Copy constructor
              * \param copy the BinaryDataset to copy */
