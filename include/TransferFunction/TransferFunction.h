@@ -4,6 +4,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include "SciVisColor.h"
+#include <algorithm>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 namespace sereno
 {
@@ -57,6 +62,10 @@ namespace sereno
             /* \brief  Get the transfer function dimension
              * \return   The transfer function dimension*/
             uint32_t getDimension() const {return m_dim;}
+
+            /* \brief  Get the color mode of this transfer function
+             * \return    the transfer function color mode */
+            ColorMode getColorMode() const {return m_mode;}
         protected:
             uint32_t  m_dim;  /*!< The transfer function dimension*/
             ColorMode m_mode; /*!< The color mode*/
@@ -75,17 +84,22 @@ namespace sereno
         for(uint32_t i = 0; i < ind; i++)
             shift*=texSize[i];
         float indArr[1024];
+
+#ifdef _OPENMP
         #pragma omp parallel private(indArr)
         {
             #pragma omp for
             {
+#endif
                 for(uint32_t i = 0; i < texSize[ind]; i++)
                 {
                     indArr[ind] = ((float)i)/texSize[ind];
                     computeTFTexelsRec(texels, texSize, indArr, tf, ind-1, i*shift);
                 }
+#ifdef _OPENMP
             }
         }
+#endif
     }
 
     /* \brief  Compute the transfer function texture by recursion. Some values are needed to be initialize at default value for the recursion to work

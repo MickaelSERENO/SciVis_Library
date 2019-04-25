@@ -11,9 +11,8 @@ namespace sereno
         m_parent = parent;
     }
 
-    void SubDataset::setColor(float min, float max, ColorMode mode)
+    void SubDataset::setClamping(float min, float max)
     {
-        m_colorMode = mode;
         m_minClamp  = min;
         m_maxClamp  = max;
     }

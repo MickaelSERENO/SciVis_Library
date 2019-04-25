@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <memory>
 #include "Quaternion.h"
+#include "TransferFunction/TransferFunction.h"
 #include "ColorMode.h"
 #include <glm/glm.hpp>
 #include <string>
@@ -28,11 +29,10 @@ namespace sereno
 
             virtual ~SubDataset(){}
 
-            /** \brief Set the color of this dataset at rendering time
-             * \param mode the color mode to apply
+            /** \brief Set the clamping of this dataset at rendering time
              * \param min the minimum clamping
              * \param max the maximum clamping*/
-            void setColor(float min, float max, ColorMode mode);
+            void setClamping(float min, float max);
 
             /* \brief Set the global rotation of this fluid dataset
              * \param quat the global rotation quaternion to apply */
@@ -49,10 +49,6 @@ namespace sereno
             /* \brief Get the maximum clamping value in ratio (0.0, 1.0)
              * \return the maximum clamping value */
             float     getMaxClamping() const {return m_maxClamp;}
-
-            /* \brief Get the color mode currently in application
-             * \return the color mode */
-            ColorMode getColorMode() const {return m_colorMode;}
 
             /* \brief Get the minimum amplitude of this dataset
              * \return the minimum amplitude */
@@ -111,9 +107,20 @@ namespace sereno
              * \return A pointer to the snapshot structure. */
             Snapshot* getSnapshot() const {return m_snapshot.get();}
 #endif
+
+            /* \brief  Get the transfer function bound to this subdataset
+             * \return   The transfer function*/
+            TF*       getTransferFunction() {return m_tf;}
+
+            /* \brief  Get the transfer function bound to this subdataset
+             * \return   The transfer function*/
+            const TF* getTransferFunction() const {return m_tf;}
+
+            /* \brief  Set the transfer function to use
+             * \param tf the transfer function to use */
+            void setTransferFunction(TF* tf) {m_tf = tf;}
         protected:
             bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
-            ColorMode   m_colorMode      = RAINBOW;            /*!< The color mode of this dataset*/
             float       m_minClamp       = 0.0f;               /*!< The minimum color clamping*/
             float       m_maxClamp       = 1.0f;               /*!< The maximum color clamping (ratio : 0.0f 1.0)*/
             float       m_amplitude[2];                        /*!< The dataset amplitude*/
@@ -122,6 +129,7 @@ namespace sereno
             glm::vec3   m_scale    = glm::vec3(1.0, 1.0, 1.0); /*!< The 3D scaling*/
             Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
             std::string m_name;                                /*!< The SubDataset name*/
+            TF*         m_tf;                                  /*!< The transfer function in application*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot;              /*!< The snapshot structure*/
