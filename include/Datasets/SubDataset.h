@@ -85,6 +85,14 @@ namespace sereno
              * \param pos the new 3D position */
             void setPosition(const glm::vec3& pos) {m_position = pos;}
 
+            /* \brief  Get the 3D scaling of this sub dataset
+             * \return  The 3D (x, y, z) scaling of this sub dataset*/
+            const glm::vec3& getScale() const {return m_scale;}
+
+            /* \brief  Set the 3D scaling of this sub dataset
+             * \param scale the new 3D scaling to apply */
+            void setScale(const glm::vec3& scale) {m_scale = scale;}
+
             /* \brief  Get the SubDataset name
              * \return   The SubDataset name */
             const std::string& getName() {return m_name;}
@@ -104,18 +112,19 @@ namespace sereno
             Snapshot* getSnapshot() const {return m_snapshot.get();}
 #endif
         protected:
-            bool        m_isValid        = false;   /*!< Is this dataset in a valid state ?*/
-            ColorMode   m_colorMode      = RAINBOW; /*!< The color mode of this dataset*/
-            float       m_minClamp       = 0.0f;    /*!< The minimum color clamping*/
-            float       m_maxClamp       = 1.0f;    /*!< The maximum color clamping (ratio : 0.0f 1.0)*/
-            float       m_amplitude[2];             /*!< The dataset amplitude*/
-            Quaternionf m_rotation;                 /*!< The quaternion rotation*/
-            glm::vec3   m_position;                 /*!< The small multiple position*/
-            Dataset*    m_parent         = NULL;    /*!< The parent dataset*/
-            std::string m_name;                     /*!< The SubDataset name*/
+            bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
+            ColorMode   m_colorMode      = RAINBOW;            /*!< The color mode of this dataset*/
+            float       m_minClamp       = 0.0f;               /*!< The minimum color clamping*/
+            float       m_maxClamp       = 1.0f;               /*!< The maximum color clamping (ratio : 0.0f 1.0)*/
+            float       m_amplitude[2];                        /*!< The dataset amplitude*/
+            Quaternionf m_rotation;                            /*!< The quaternion rotation*/
+            glm::vec3   m_position = glm::vec3(0.0, 0.0, 0.0); /*!< The small multiple position*/
+            glm::vec3   m_scale    = glm::vec3(1.0, 1.0, 1.0); /*!< The 3D scaling*/
+            Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
+            std::string m_name;                                /*!< The SubDataset name*/
 
 #ifdef SNAPSHOT
-            std::shared_ptr<Snapshot> m_snapshot;   /*!< The snapshot structure*/
+            std::shared_ptr<Snapshot> m_snapshot;              /*!< The snapshot structure*/
 #endif
 
         friend class Dataset;
