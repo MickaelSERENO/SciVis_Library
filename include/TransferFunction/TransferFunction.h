@@ -45,7 +45,7 @@ namespace sereno
                 return 0xff;
             }
 
-            /* \brief  Compute the RGB color of this transfer function
+            /* \brief  Compute the RGB color of this transfer function. The color is the length of the indice
              * \param ind the normalized indice of the transfer function. Must be at least of size = getDim
              * \param colOut[out] the RGB color output. Minimum size: 3*/
             virtual void computeColor(float* ind, uint8_t* colOut) const
@@ -66,6 +66,10 @@ namespace sereno
             /* \brief  Get the color mode of this transfer function
              * \return    the transfer function color mode */
             ColorMode getColorMode() const {return m_mode;}
+
+            /* \brief  Get the color mode of this transfer function
+             * \param mode the new transfer function color mode */
+            void setColorMode(ColorMode mode) {m_mode = mode;}
         protected:
             uint32_t  m_dim;  /*!< The transfer function dimension*/
             ColorMode m_mode; /*!< The color mode*/

@@ -1,5 +1,5 @@
-#ifndef DEF_COLOR_INCLUDE
-#define DEF_COLOR_INCLUDE
+#ifndef DEF_INCLUDE_COLOR
+#define DEF_INCLUDE_COLOR
 
 #include <cmath>
 
@@ -35,41 +35,38 @@ namespace sereno
 
             /**
              * \brief  Get the color component rgba based on an index. If x >=3, returns alpha component
-             * \param x the indice to fetch. 0 == r, 1 == g, 2==b, x >=3 == a
+             * \param x the indice to fetch. 0 == r, 1 == g, 2==b, 3==a, more == undefined
              * \return the component reference value  
              */
             float& operator[] (int x)
             {
-                switch(x)
-                {
-                    case 0:
-                        return r;
-                    case 1:
-                        return g;
-                    case 2:
-                        return b;
-                    default:
-                        return a;
-                }
+                return _data[x];
             }
 
-            float r; /** <red component */
-            float g; /** <green component */
-            float b; /** <blue component */
-            float a; /** <alpha component */
+            union
+            {
+                struct
+                {
+                    float r; /** <red component */
+                    float g; /** <green component */
+                    float b; /** <blue component */
+                    float a; /** <alpha component */
+                };
+                float _data[4];
+            };
 
             static const Color COLD_COLOR; /** <The Cold color usually use in visualization */
             static const Color WARM_COLOR; /** <The Cold color usually use in visualization */
 
-            static const Color WHITE;/** <White color */
-            static const Color BLACK;/** <Black color */
-            static const Color RED;/** <Red color */
-            static const Color GREEN;/** <Green color */
-            static const Color BLUE;/** <Blue color */
-            static const Color MAGENTA;/** <Magenta color */
-            static const Color YELLOW;/** <Yellow color*/
-            static const Color CYAN;/** <Cyan color */
-            static const Color TRANSPARENT;/** <Transparent color */
+            static const Color WHITE_COLOR;/** <White color */
+            static const Color BLACK_COLOR;/** <Black color */
+            static const Color RED_COLOR;/** <Red color */
+            static const Color GREEN_COLOR;/** <Green color */
+            static const Color BLUE_COLOR;/** <Blue color */
+            static const Color MAGENTA_COLOR;/** <Magenta color */
+            static const Color YELLOW_COLOR;/** <Yellow color*/
+            static const Color CYAN_COLOR;/** <Cyan color */
+            static const Color TRANSPARENT_COLOR;/** <Transparent color */
     };
 
     /** \brief  The HSV Colorspace description */
@@ -200,9 +197,9 @@ namespace sereno
     class LABColor
     {
         public:
-            static const LABColor COLD_COLOR; /* !<Cold LAB Color usually use in visualization */
-            static const LABColor WHITE;      /* !<The White LAB Color */
-            static const LABColor WARM_COLOR; /* !<Warm LAB Color usually use in visualization */
+            static const LABColor COLD_COLOR;  /* !<Cold LAB Color usually use in visualization */
+            static const LABColor WHITE_COLOR; /* !<The White LAB Color */
+            static const LABColor WARM_COLOR;  /* !<Warm LAB Color usually use in visualization */
 
             /**
              * \brief  Constructor
@@ -296,9 +293,9 @@ namespace sereno
     class LUVColor
     {
         public:
-            static const LUVColor COLD_COLOR; /* !<Cold LUV Color usually use in visualization */
-            static const LUVColor WHITE;      /* !<The White LUV Color */
-            static const LUVColor WARM_COLOR; /* !<Warm LUV Color usually use in visualization */
+            static const LUVColor COLD_COLOR;  /* !<Cold LUV Color usually use in visualization */
+            static const LUVColor WHITE_COLOR; /* !<The White LUV Color */
+            static const LUVColor WARM_COLOR;  /* !<Warm LUV Color usually use in visualization */
 
             /**
              * \brief  Constructor
@@ -375,9 +372,9 @@ namespace sereno
     class MSHColor
     {
         public:
-            static const MSHColor COLD_COLOR; /* !<Cold MSH Color usually use in visualization */
-            static const MSHColor WHITE;      /* !<The White MSH Color */
-            static const MSHColor WARM_COLOR; /* !<Warm MSH Color usually use in visualization */
+            static const MSHColor COLD_COLOR;  /* !<Cold MSH Color usually use in visualization */
+            static const MSHColor WHITE_COLOR; /* !<The White MSH Color */
+            static const MSHColor WARM_COLOR;  /* !<Warm MSH Color usually use in visualization */
 
             /**
              * \brief  Constructor

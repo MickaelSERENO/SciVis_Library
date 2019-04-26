@@ -129,7 +129,7 @@ namespace sereno
             glm::vec3   m_scale    = glm::vec3(1.0, 1.0, 1.0); /*!< The 3D scaling*/
             Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
             std::string m_name;                                /*!< The SubDataset name*/
-            TF*         m_tf;                                  /*!< The transfer function in application*/
+            TF*         m_tf       = NULL;                     /*!< The transfer function in application*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot;              /*!< The snapshot structure*/

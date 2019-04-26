@@ -7,17 +7,17 @@ namespace sereno
     /*-----------------------------------Colors-----------------------------------*/
     /*----------------------------------------------------------------------------*/
 
-    const Color Color::COLD_COLOR  = Color(59.0f/255.0f, 76.0f/255.0f, 192.0f/255.0f, 1.0f);
-    const Color Color::WARM_COLOR  = Color(180.0/255.0f,  4.0f/255.0f,  38.0f/255.0f, 1.0f);
-    const Color Color::WHITE       = Color(1.0, 1.0, 1.0, 1.0);
-    const Color Color::BLACK       = Color(0.0, 0.0, 0.0, 1.0);
-    const Color Color::RED         = Color(1.0, 0.0, 0.0, 1.0);
-    const Color Color::GREEN       = Color(0.0, 1.0, 0.0, 1.0);
-    const Color Color::BLUE        = Color(0.0, 0.0, 1.0, 1.0);
-    const Color Color::MAGENTA     = Color(1.0, 0.0, 1.0, 1.0);
-    const Color Color::YELLOW      = Color(1.0, 1.0, 0.0, 1.0);
-    const Color Color::CYAN        = Color(0.0, 1.0, 1.0, 1.0);
-    const Color Color::TRANSPARENT = Color(0.0, 0.0, 0.0, 0.0);
+    const Color Color::COLD_COLOR        = Color(59.0f/255.0f, 76.0f/255.0f, 192.0f/255.0f, 1.0f);
+    const Color Color::WARM_COLOR        = Color(180.0/255.0f,  4.0f/255.0f,  38.0f/255.0f, 1.0f);
+    const Color Color::WHITE_COLOR       = Color(1.0, 1.0, 1.0, 1.0);
+    const Color Color::BLACK_COLOR       = Color(0.0, 0.0, 0.0, 1.0);
+    const Color Color::RED_COLOR         = Color(1.0, 0.0, 0.0, 1.0);
+    const Color Color::GREEN_COLOR       = Color(0.0, 1.0, 0.0, 1.0);
+    const Color Color::BLUE_COLOR        = Color(0.0, 0.0, 1.0, 1.0);
+    const Color Color::MAGENTA_COLOR     = Color(1.0, 0.0, 1.0, 1.0);
+    const Color Color::YELLOW_COLOR      = Color(1.0, 1.0, 0.0, 1.0);
+    const Color Color::CYAN_COLOR        = Color(0.0, 1.0, 1.0, 1.0);
+    const Color Color::TRANSPARENT_COLOR = Color(0.0, 0.0, 0.0, 0.0);
 
     Color::Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), a(alpha)
     {}
@@ -273,9 +273,9 @@ namespace sereno
     /*---------------------------------LAB Color----------------------------------*/
     /*----------------------------------------------------------------------------*/
 
-    const LABColor LABColor::COLD_COLOR = LABColor(Color::COLD_COLOR);
-    const LABColor LABColor::WHITE      = LABColor(Color::WHITE);
-    const LABColor LABColor::WARM_COLOR = LABColor(Color::WARM_COLOR);
+    const LABColor LABColor::COLD_COLOR  = LABColor(Color::COLD_COLOR);
+    const LABColor LABColor::WHITE_COLOR = LABColor(Color::WHITE_COLOR);
+    const LABColor LABColor::WARM_COLOR  = LABColor(Color::WARM_COLOR);
 
     LABColor::LABColor(float _l, float _a, float _b, float _transparency) : l(_l), a(_a), b(_b), transparency(_transparency)
     {}
@@ -387,7 +387,7 @@ namespace sereno
     /*----------------------------------------------------------------------------*/
 
     const LUVColor LUVColor::COLD_COLOR = LUVColor(Color::COLD_COLOR);
-    const LUVColor LUVColor::WHITE      = LUVColor(Color::WHITE);
+    const LUVColor LUVColor::WHITE_COLOR      = LUVColor(Color::WHITE_COLOR);
     const LUVColor LUVColor::WARM_COLOR = LUVColor(Color::WARM_COLOR);
 
     LUVColor::LUVColor(float _l, float _u, float _v, float _a) : l(_l), u(_u), v(_v), a(_a)
@@ -522,9 +522,9 @@ namespace sereno
     /*---------------------------------MSH Color----------------------------------*/
     /*----------------------------------------------------------------------------*/
 
-    const MSHColor MSHColor::COLD_COLOR = MSHColor(Color::COLD_COLOR);
-    const MSHColor MSHColor::WHITE      = MSHColor(Color::WHITE);
-    const MSHColor MSHColor::WARM_COLOR = MSHColor(Color::WARM_COLOR);
+    const MSHColor MSHColor::COLD_COLOR  = MSHColor(Color::COLD_COLOR);
+    const MSHColor MSHColor::WHITE_COLOR = MSHColor(Color::WHITE_COLOR);
+    const MSHColor MSHColor::WARM_COLOR  = MSHColor(Color::WARM_COLOR);
 
     MSHColor::MSHColor(float _m, float _s, float _h, float _a) : m(_m), s(_s), h(_h), a(_a)
     {}

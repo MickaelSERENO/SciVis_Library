@@ -35,12 +35,12 @@ namespace sereno
             {
                 if(t < 0.5f)
                 {
-                    LUVColor luv = LUVColor::COLD_COLOR*(1.0f-2.0f*t) + LUVColor::WHITE*2.0f*t;
+                    LUVColor luv = LUVColor::COLD_COLOR*(1.0f-2.0f*t) + LUVColor::WHITE_COLOR*2.0f*t;
                     c = luv.toRGB();
                 }
                 else
                 {
-                    LUVColor luv = LUVColor::WHITE*(2.0f-2.0f*t) + LUVColor::WARM_COLOR*(2.0f*t-1.0f);
+                    LUVColor luv = LUVColor::WHITE_COLOR*(2.0f-2.0f*t) + LUVColor::WARM_COLOR*(2.0f*t-1.0f);
                     c = luv.toRGB();
                 }
                 break;
@@ -49,12 +49,12 @@ namespace sereno
             {
                 if(t < 0.5f)
                 {
-                    LABColor lab = LABColor::COLD_COLOR*(1.0-2.0*t) + LABColor::WHITE*2.0*t;
+                    LABColor lab = LABColor::COLD_COLOR*(1.0-2.0*t) + LABColor::WHITE_COLOR*2.0*t;
                     c = lab.toRGB();
                 }
                 else
                 {
-                    LABColor lab = LABColor::WHITE*(2.0f-2.0f*t) + LABColor::WARM_COLOR*(2.0f*t-1.0f);
+                    LABColor lab = LABColor::WHITE_COLOR*(2.0f-2.0f*t) + LABColor::WARM_COLOR*(2.0f*t-1.0f);
                     c = lab.toRGB();
                 }
                 break;
