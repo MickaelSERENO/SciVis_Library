@@ -4,11 +4,13 @@
 #include <limits>
 #include <stdint.h>
 #include <memory>
+#include <list>
+#include <glm/glm.hpp>
+#include <string>
 #include "Quaternion.h"
 #include "TransferFunction/TransferFunction.h"
 #include "ColorMode.h"
-#include <glm/glm.hpp>
-#include <string>
+#include "Datasets/Annotation/Annotation.h"
 
 #ifdef SNAPSHOT
     #include "Datasets/Snapshot.h"
@@ -27,7 +29,7 @@ namespace sereno
              * \param name the SUbDataset name*/
             SubDataset(Dataset* parent, const std::string& name);
 
-            virtual ~SubDataset(){}
+            virtual ~SubDataset();
 
             /** \brief Set the clamping of this dataset at rendering time
              * \param min the minimum clamping
@@ -93,6 +95,21 @@ namespace sereno
              * \return   The SubDataset name */
             const std::string& getName() {return m_name;}
 
+            /* \brief  Emplace a new annotation
+             * \param pxWidth the width in pixels of the annotation
+             * \param pxHeight the height in pixels of the annotation
+             * \param position the annotation's 3D position. Can be NULL (hence position = 0, 0, 0)
+             * \return    the new created annotation. Do not delete/free it */
+            Annotation* emplaceAnnotation(uint32_t pxWidth, uint32_t pxHeight, float* position);
+
+            /* \brief  Add a new annotation. 
+             * \param annot the new annotation to add. */
+            void addAnnotation(std::shared_ptr<Annotation> annot);
+
+            /* \brief  Get the registered annotations
+             * \return  the registered annotations bound to this SubDataset */
+            const std::list<std::shared_ptr<Annotation>>& getAnnotations() const {return m_annotations;}
+
 #ifdef SNAPSHOT
             /**
              * \brief  Set the snapshot from this scientific visualization
@@ -130,6 +147,7 @@ namespace sereno
             Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
             std::string m_name;                                /*!< The SubDataset name*/
             TF*         m_tf       = NULL;                     /*!< The transfer function in application*/
+            std::list<std::shared_ptr<Annotation>> m_annotations;              /*!< The SubDataset Annotation*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot;              /*!< The snapshot structure*/
