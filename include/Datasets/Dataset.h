@@ -42,6 +42,24 @@ namespace sereno
              * \return  the number of subdataset this dataset possesses 
              */
             uint32_t getNbSubDatasets() const {return m_subDatasets.size();}
+
+            /* \brief  Remove a given SubDataset from the list of data
+             * \param sd The SubDataset to remove*/
+            virtual void removeSubDataset(SubDataset* sd) 
+            {
+                if(m_subDatasets.size() == 0)
+                    return;
+
+                for(std::vector<SubDataset*>::iterator it = m_subDatasets.begin(); it != m_subDatasets.end(); it++)
+                {
+                    if(*it == sd)
+                    {
+                        m_subDatasets.erase(it);
+                        delete sd;
+                        break;
+                    }
+                }
+            }
         protected:
             /**
              * \brief  Set the subdataset amplitude using friendship

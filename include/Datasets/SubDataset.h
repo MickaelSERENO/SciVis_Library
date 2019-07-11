@@ -106,6 +106,16 @@ namespace sereno
              * \param annot the new annotation to add. */
             void addAnnotation(std::shared_ptr<Annotation> annot);
 
+            /* \brief Remove an annotation in the list
+             * \param annot the annotation to remove 
+             * \return true on success, false on error*/
+            bool removeAnnotation(std::shared_ptr<Annotation> annot);
+
+            /* \brief Remove an annotation in the list
+             * \param it the iterator pointing to the annotation to remove
+             * \return the next iterator in the list of the annotation (result of erase)*/
+            std::list<std::shared_ptr<Annotation>>::const_iterator removeAnnotation(std::list<std::shared_ptr<Annotation>>::const_iterator it);
+
             /* \brief  Get the registered annotations
              * \return  the registered annotations bound to this SubDataset */
             const std::list<std::shared_ptr<Annotation>>& getAnnotations() const {return m_annotations;}

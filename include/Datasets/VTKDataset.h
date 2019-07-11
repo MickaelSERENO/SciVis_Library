@@ -55,6 +55,28 @@ namespace sereno
                         return i;
                 return -1;
             }
+
+            virtual void removeSubDataset(SubDataset* sd) 
+            {
+                for(uint32_t i = 0; i < m_subDatasets.size(); i++)
+                    if(m_subDatasets[i] == sd)
+                    {
+                        if(i < m_ptFieldValues.size())
+                        {
+                            auto it = m_ptFieldValues.begin();
+                            std::advance(it, i);
+                            m_ptFieldValues.erase(it);
+                        }
+                        else if(i < m_ptFieldValues.size() + m_cellFieldValues.size())
+                        {
+                            auto it = m_cellFieldValues.begin();
+                            std::advance(it, i-m_ptFieldValues.size());
+                            m_ptFieldValues.erase(it);
+                        }
+                        break;
+                    }
+                Dataset::removeSubDataset(sd);
+            }
         private:
             std::vector<const VTKFieldValue*> m_ptFieldValues;   /*!< The point field values*/
             std::vector<const VTKFieldValue*> m_cellFieldValues; /*!< The cell  field values*/

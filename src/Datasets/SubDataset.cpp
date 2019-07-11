@@ -32,4 +32,17 @@ namespace sereno
     {
         m_annotations.push_back(annot);
     }
+
+    bool SubDataset::removeAnnotation(std::shared_ptr<Annotation> annot)
+    {
+        for(std::list<std::shared_ptr<Annotation>>::const_iterator it = m_annotations.begin(); it != m_annotations.end(); it++)
+            if((*it) == annot)
+                return removeAnnotation(it) != m_annotations.end();
+        return false;
+    }
+
+    std::list<std::shared_ptr<Annotation>>::const_iterator SubDataset::removeAnnotation(std::list<std::shared_ptr<Annotation>>::const_iterator it)
+    {
+        return m_annotations.erase(it);
+    }
 }
