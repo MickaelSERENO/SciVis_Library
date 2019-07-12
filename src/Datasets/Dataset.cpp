@@ -21,5 +21,9 @@ namespace sereno
         return *this;
     }
 
-    Dataset::~Dataset(){}
+    Dataset::~Dataset()
+    {
+        for(SubDataset* sd : m_subDatasets)
+            delete sd;
+    }
 }
