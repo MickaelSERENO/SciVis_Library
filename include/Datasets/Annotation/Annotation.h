@@ -18,6 +18,15 @@ namespace sereno
              * \param position the annotation's 3D position. If NULL, position = (0, 0, 0) */
             Annotation(uint32_t pxWidth, uint32_t pxHeight, float* position);
 
+            /* \brief  Copy constructor
+             * \param annot the annotation to copy */
+            Annotation(const Annotation& annot);
+
+            /* \brief  Assignment operator
+             * \param annot the annotation to copy
+             * \return   reference to the current object */
+            Annotation& operator=(const Annotation& annot);
+
             /** \brief  Destructor. */
             virtual ~Annotation(){}
 

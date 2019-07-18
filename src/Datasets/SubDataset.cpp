@@ -11,6 +11,38 @@ namespace sereno
         m_parent = parent;
     }
 
+    SubDataset::SubDataset(const SubDataset& sd)
+    {
+        *this = sd;
+    }
+
+    SubDataset& SubDataset::operator=(const SubDataset& sd)
+    {
+        if(this != &sd)
+        {
+            m_isValid   = sd.m_isValid;
+            m_minClamp  = sd.m_minClamp;
+            m_isValid   = sd.m_isValid;
+            m_minClamp  = sd.m_minClamp;
+            m_maxClamp  = sd.m_maxClamp;
+            for(uint8_t i = 0; i < 2; i++)
+                m_amplitude[i] = sd.m_amplitude[i];
+            m_rotation  = sd.m_rotation;
+            m_position  = sd.m_position;
+            m_scale     = sd.m_scale;
+            m_parent    = sd.m_parent;
+            m_name      = sd.m_name;
+
+            //TODO copy that in a better way
+            m_tf        = sd.m_tf;
+
+            for(auto& it : sd.m_annotations)
+                m_annotations.push_back(std::shared_ptr<Annotation>(new Annotation(*it.get())));
+        }
+
+        return *this;
+    }
+
     SubDataset::~SubDataset()
     {
     }

@@ -12,6 +12,30 @@ namespace sereno
                 m_position[i] = 0;
     }
 
+    Annotation::Annotation(const Annotation& copy)
+    {
+        *this = copy;
+    }
+
+    Annotation& Annotation::operator=(const Annotation& copy)
+    {
+        if(this != &copy)
+        {
+            m_width  = copy.m_width;
+            m_height = copy.m_height;
+
+            for(uint32_t i = 0; i < 3; i++)
+                m_position[i] = copy.m_position[i];
+
+            for(auto& it : copy.m_strokes)
+                m_strokes.push_back(std::shared_ptr<AnnotationStroke>(new AnnotationStroke(*it.get())));
+            for(auto& it : copy.m_texts)
+                m_texts.push_back(std::shared_ptr<AnnotationText>(new AnnotationText(*it.get())));
+        }
+
+        return *this;
+    }
+
     AnnotationStroke* Annotation::emplaceStroke()
     {
         AnnotationStroke* stroke = new AnnotationStroke();

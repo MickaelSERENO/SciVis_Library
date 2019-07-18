@@ -29,6 +29,14 @@ namespace sereno
              * \param name the SUbDataset name*/
             SubDataset(Dataset* parent, const std::string& name);
 
+            /** \brief Copy constructor
+             * \param copy the parameter to copy */
+            SubDataset(const SubDataset& copy);
+
+            /** \brief Copy assignment
+             * \param copy the parameter to copy*/
+            SubDataset& operator=(const SubDataset& copy);
+
             virtual ~SubDataset();
 
             /** \brief Set the clamping of this dataset at rendering time
@@ -157,10 +165,10 @@ namespace sereno
             Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
             std::string m_name;                                /*!< The SubDataset name*/
             TF*         m_tf       = NULL;                     /*!< The transfer function in application*/
-            std::list<std::shared_ptr<Annotation>> m_annotations;              /*!< The SubDataset Annotation*/
+            std::list<std::shared_ptr<Annotation>> m_annotations; /*!< The SubDataset Annotation*/
 
 #ifdef SNAPSHOT
-            std::shared_ptr<Snapshot> m_snapshot;              /*!< The snapshot structure*/
+            std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
 #endif
 
         friend class Dataset;
