@@ -29,10 +29,6 @@ namespace sereno
         fseek(file, pos, SEEK_SET);
         m_velocity = (float*)malloc(3*sizeof(float*)*m_size[0]*m_size[1]*m_size[2]);
 
-        //Only one sub dataset available
-        SubDataset* subData = new SubDataset(this, name);
-        m_subDatasets.push_back(subData);
-
         //read data
         //We do not precompute magnitude or so because of memory issue. We prefer using CPU time instead of RAM
         //However we store the ampltitude range
@@ -58,10 +54,9 @@ namespace sereno
             }
         }while(readSize != 0);
 
-        amplitude[0] = sqrt(amplitude[0]);
-        amplitude[1] = sqrt(amplitude[1]);
-        setSubDatasetAmplitude(subData, amplitude);
-        setSubDatasetValidity(subData, true);
+        //Save the amplitude
+        for(int i = 0; i < 2; i++)
+            m_amplitude[i] = sqrt(amplitude[i]);
 #undef BUFFER_SIZE
     }
 
@@ -95,8 +90,6 @@ namespace sereno
     {
         if(m_velocity)
             free(m_velocity);
-        for(auto d : m_subDatasets)
-            delete d;
     }
 
     BinaryDataset* BinaryDataset::readFromFilePath(const std::string& path)

@@ -23,7 +23,7 @@ namespace sereno
 
     Dataset::~Dataset()
     {
-        for(SubDataset* sd : m_subDatasets)
-            delete sd;
+        while(m_subDatasets.size() != 0)
+            removeSubDataset(m_subDatasets.back());
     }
 }

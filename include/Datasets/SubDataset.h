@@ -27,7 +27,7 @@ namespace sereno
             /** \brief  Constructor 
              * \param parent the parent Dataset
              * \param name the SUbDataset name*/
-            SubDataset(Dataset* parent, const std::string& name);
+            SubDataset(Dataset* parent, const std::string& name, uint32_t id);
 
             /** \brief Copy constructor
              * \param copy the parameter to copy */
@@ -101,7 +101,7 @@ namespace sereno
 
             /* \brief  Get the SubDataset name
              * \return   The SubDataset name */
-            const std::string& getName() {return m_name;}
+            const std::string& getName() const {return m_name;}
 
             /* \brief  Emplace a new annotation
              * \param pxWidth the width in pixels of the annotation
@@ -154,6 +154,8 @@ namespace sereno
             /* \brief  Set the transfer function to use
              * \param tf the transfer function to use */
             void setTransferFunction(TF* tf) {m_tf = tf;}
+
+            uint32_t getID() const {return m_id;}
         protected:
             bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
             float       m_minClamp       = 0.0f;               /*!< The minimum color clamping*/
@@ -165,11 +167,17 @@ namespace sereno
             Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
             std::string m_name;                                /*!< The SubDataset name*/
             TF*         m_tf       = NULL;                     /*!< The transfer function in application*/
+            uint32_t    m_id       = 1;                        /*!< The SubDataset ID*/
             std::list<std::shared_ptr<Annotation>> m_annotations; /*!< The SubDataset Annotation*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
 #endif
+
+        private:
+            /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
+             * \param id the new ID */
+            void setID(uint32_t id) {m_id = id;}
 
         friend class Dataset;
     };

@@ -30,18 +30,52 @@ namespace sereno
             /** \brief  Destructor */
             virtual ~Dataset();
 
+            /* \brief  Get the SubDatasets registered
+             * \return  The array of SubDatasets registered */
+            const std::vector<SubDataset*>& getSubDatasets() const
+            {
+                return m_subDatasets;
+            }
+
+            /* \brief  Get the SubDatasets registered
+             * \return  The array of SubDatasets registered */
+            std::vector<SubDataset*>& getSubDatasets()
+            {
+                return m_subDatasets;
+            }
+
             /**
              * \brief  Get the subdataset indice i
-             * \param i the indice of the subdataset required
-             * \return  subDatasets[i] or NULL if i is out of range
+             * \param  i the indice of the subdataset required
+             * \return  the SubDataset Having the correct ID
              */
-            SubDataset* getSubDataset(uint32_t i) {return (i < m_subDatasets.size()) ? m_subDatasets[i] : NULL;}
+            SubDataset* getSubDataset(uint32_t i) 
+            {
+                for(SubDataset* sd : m_subDatasets)
+                    if(sd->getID() == i)
+                        return sd;
+                return NULL;
+            }
 
             /**
              * \brief  Get the number of subdatasets this dataset possesses
              * \return  the number of subdataset this dataset possesses 
              */
             uint32_t getNbSubDatasets() const {return m_subDatasets.size();}
+
+            /**
+             * \brief Duplicated a given SubDataset: create a copy of it
+             * \param sd the SubDataset to copy
+             *
+             * \return the new created SubDataset */
+            virtual void duplicateSubDataset(const SubDataset& sd)
+            {
+                if(sd.getParent() == this)
+                {
+                    SubDataset* copy = new SubDataset(sd);
+                    addSubDataset(copy);
+                }
+            }
 
             /* \brief  Remove a given SubDataset from the list of data
              * \param sd The SubDataset to remove*/
@@ -60,6 +94,20 @@ namespace sereno
                     }
                 }
             }
+
+            /* \brief  Add a SubDataset in the related SubDataset list. The parent must coincide
+             * \param sd The SubDataset related */
+            void addSubDataset(SubDataset* sd)
+            {
+                //Check if the SubDataset is already registered or not
+                for(SubDataset* sd2 : m_subDatasets)
+                    if(sd2 == sd)
+                        return;
+
+                sd->setID(m_curSDID++);
+                m_subDatasets.push_back(sd);
+            }
+
         protected:
             /**
              * \brief  Set the subdataset amplitude using friendship
@@ -79,7 +127,9 @@ namespace sereno
             {
                 dataset->m_isValid = isValid;
             }
+
             std::vector<SubDataset*> m_subDatasets; /*!< Array of sub datasets*/
+            uint32_t m_curSDID = 0; /*!< The current SubDataset ID*/
     };
 }
 

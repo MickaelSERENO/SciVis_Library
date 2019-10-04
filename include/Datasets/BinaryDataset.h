@@ -72,6 +72,7 @@ namespace sereno
         private:
             uint32_t m_size[3];           /*!< The 3D size of the grid*/
             float*   m_velocity = NULL;   /*!< The velocity array of all the grid cell. Access via m_velocity[i + j*width + k*width*height] */ 
+            float    m_amplitude[2];      /*!< The maximum and minimum velocity amplitude */
     };
 }
 
