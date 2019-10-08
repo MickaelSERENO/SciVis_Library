@@ -108,6 +108,17 @@ namespace sereno
                 m_subDatasets.push_back(sd);
             }
 
+            /* \brief Add a SubDataset in the related SubDataset list. The parent must coincide. The SubDataset's ID will not be modified. Hence, to not use this function with addSubDataset since the latest changes the SubDataset ID, which can create conflict
+             * \param sd The SubDataset related */
+            void addSubDatasetWithID(SubDataset* sd)
+            {
+                for(SubDataset* sd2 : m_subDatasets)
+                    if(sd2 == sd)
+                        return;
+
+                m_subDatasets.push_back(sd);
+            }
+
         protected:
             /**
              * \brief  Set the subdataset amplitude using friendship
