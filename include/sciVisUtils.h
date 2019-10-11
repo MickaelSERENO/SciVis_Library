@@ -74,6 +74,8 @@ namespace serenoSciVis
                (data[2] << 8 ) + (data[3]);
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
     /* \brief Convert a uint8 ptr (4 value) to a float
      * \param data the uint8_t ptr
      * \return the float */
@@ -82,6 +84,7 @@ namespace serenoSciVis
         uint32_t t = uint8ToUint32(data);
         return *(float*)&t;
     }
+#pragma GCC diagnostic pop
 
 
 #if __cplusplus > 201703L

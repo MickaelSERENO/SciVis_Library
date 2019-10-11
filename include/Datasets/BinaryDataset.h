@@ -69,6 +69,16 @@ namespace sereno
              * \param z the z coordinate
              * \return the direction encoded in a Quaternion */
             Quaternionf getRotationQuaternion(uint32_t x, uint32_t y, uint32_t z) const;
+
+            virtual void loadValues(LoadCallback clbk, void* data) {} //TODO
+
+            virtual bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const {return false;} //TODO
+
+            virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const
+            {
+                std::cerr << "Histograms cannot be computed for this type of Dataset because it contains only one fieldID" << std::endl;
+                return false;
+            }
         private:
             uint32_t m_size[3];           /*!< The 3D size of the grid*/
             float*   m_velocity = NULL;   /*!< The velocity array of all the grid cell. Access via m_velocity[i + j*width + k*width*height] */ 

@@ -2,11 +2,21 @@
 #define  DATASET_INC
 
 #include "Datasets/SubDataset.h"
+#include "Datasets/PointFieldDesc.h"
 #include <vector>
 #include <cstdint>
 
 namespace sereno
 {
+    class Dataset;
+
+    /* \brief  Callback function to call
+     *
+     * \param dataset  the Dataset which were loading data
+     * \param status   the status of the loading
+     * \param clbkData External data needed */
+    typedef void(*LoadCallback)(Dataset* dataset, uint32_t status, void* clbkData);
+
     /** \brief  Dataset class. */
     class Dataset
     {
@@ -119,6 +129,43 @@ namespace sereno
                 m_subDatasets.push_back(sd);
             }
 
+            /* \brief  Get the description of point field data
+             * \return  A point field description */
+            const std::vector<PointFieldDesc>& getPointFieldDescs() const
+            {
+                return m_pointFieldDescs;
+            }
+
+            /* \brief  Load the values of the Dataset in a separated thread.
+             * \param clbk the callback function to call when the loading is finished
+             * \param data extra data to send to the callback function*/
+            virtual void loadValues(LoadCallback clbk, void* data) = 0;
+
+            /* \brief  Are the values loaded?
+             * \return   true if yes, false otherwise */
+            bool areValuesLoaded() const {return m_valuesLoaded;}
+
+            /**
+             * \brief  Create a 1D histogram
+             *
+             * \param output The output image. size: width*sizeof(uint32_t).
+             * \param width  The output image width.  nbBinsX = (xAxis->max - xAxis->min)/width
+             * \param ptFieldXID the point field ID to fetch
+             *
+             * \return true on success, false on failure. If failed, output will not be touched */
+            virtual bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const = 0;
+
+            /**
+             * \brief  Create a 2D histogram
+             *
+             * \param output The output image. size: width*height*sizeof(uint32_t). X values are stocked first (row-major)
+             * \param width  The output image width.  nbBinsX = (xAxis->max - xAxis->min)/width
+             * \param height The output image height. nbBinsY = (yAxis->max - yAxis->min)/height
+             * \param ptFieldXID the point field X ID to fetch
+             * \param ptFieldXID the point field Y ID to fetch
+             *
+             * \return true on success, false on failure. If failed, output will not be touched */
+            virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const = 0;
         protected:
             /**
              * \brief  Set the subdataset amplitude using friendship
@@ -139,8 +186,10 @@ namespace sereno
                 dataset->m_isValid = isValid;
             }
 
-            std::vector<SubDataset*> m_subDatasets; /*!< Array of sub datasets*/
+            std::vector<SubDataset*>    m_subDatasets;     /*!< Array of sub datasets*/
+            std::vector<PointFieldDesc> m_pointFieldDescs; /*!< Array of point field data*/
             uint32_t m_curSDID = 0; /*!< The current SubDataset ID*/
+            bool     m_valuesLoaded = false; /*!< Are the values parsed?*/
     };
 }
 

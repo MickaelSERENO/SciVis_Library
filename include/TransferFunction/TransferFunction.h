@@ -93,15 +93,13 @@ namespace sereno
         #pragma omp parallel private(indArr)
         {
             #pragma omp for
-            {
 #endif
-                for(uint32_t i = 0; i < texSize[ind]; i++)
-                {
-                    indArr[ind] = ((float)i)/texSize[ind];
-                    computeTFTexelsRec(texels, texSize, indArr, tf, ind-1, i*shift);
-                }
-#ifdef _OPENMP
+            for(uint32_t i = 0; i < texSize[ind]; i++)
+            {
+                indArr[ind] = ((float)i)/texSize[ind];
+                computeTFTexelsRec(texels, texSize, indArr, tf, ind-1, i*shift);
             }
+#ifdef _OPENMP
         }
 #endif
     }

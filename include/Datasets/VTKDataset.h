@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <thread>
 #include "VTKParser.h"
 #include "Dataset.h"
 
@@ -21,6 +22,8 @@ namespace sereno
              */
             VTKDataset(std::shared_ptr<VTKParser>& parser, const std::vector<const VTKFieldValue*>& ptFieldValues, 
                                      const std::vector<const VTKFieldValue*>& cellFieldValues);
+
+            ~VTKDataset();
 
             /* \brief  Get the Parser containing the dataset data
              * \return  the VTKParser */
@@ -60,10 +63,18 @@ namespace sereno
             {
                 Dataset::removeSubDataset(sd);
             }
+
+            virtual void loadValues(LoadCallback clbk, void* data);
+
+            virtual bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const;
+
+            virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const;
         private:
-            std::vector<const VTKFieldValue*> m_ptFieldValues;   /*!< The point field values*/
-            std::vector<const VTKFieldValue*> m_cellFieldValues; /*!< The cell  field values*/
-            std::shared_ptr<VTKParser>        m_parser;          /*!< The VTK parser*/
+            std::vector<const VTKFieldValue*> m_ptFieldValues;     /*!< The point field values*/
+            std::vector<const VTKFieldValue*> m_cellFieldValues;   /*!< The cell  field values*/
+            std::shared_ptr<VTKParser>        m_parser;            /*!< The VTK parser*/
+            std::thread                       m_readThread;        /*!< The reading thread*/
+            bool                              m_readThreadRunning = false; /*!< Is the reading thread running?*/
     };
 }
 
