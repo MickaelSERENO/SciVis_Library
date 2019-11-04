@@ -40,11 +40,10 @@ namespace sereno
                 {
                     const VTKFieldValue* val = m_ptFieldValues[i];
                     uint8_t* data = (uint8_t*)m_parser->parseAllFieldValues(val);
-                    m_pointFieldDescs[i].values.reset(data);
 
                     //Compute min/max
-                    float minVal = std::numeric_limits<float>::max();
-                    float maxVal = std::numeric_limits<float>::min();
+                    double minVal = std::numeric_limits<double>::max();
+                    double maxVal = -minVal;
 
                     uint8_t valueFormatInt = VTKValueFormatInt(val->format);
 
@@ -52,18 +51,13 @@ namespace sereno
                     if(m_pointFieldDescs[i].nbValuePerTuple == 1)
                     {
 #if defined(_OPENMP)
-                        #pragma omp parallel
+                        #pragma omp parallel for reduction(max:maxVal) reduction(min:minVal)
 #endif
+                        for(uint32_t k = 0; k < val->nbTuples; k++)
                         {
-#if defined(_OPENMP)
-                            #pragma omp for reduction(max:maxVal) reduction(min:minVal)
-#endif
-                            for(uint32_t k = 0; k < val->nbTuples; k++)
-                            {
-                                float readVal = readParsedVTKValue<float>(data + k*valueFormatInt, val->format);
-                                minVal = fmin(minVal, readVal);
-                                maxVal = fmax(maxVal, readVal);
-                            }
+                            double readVal = readParsedVTKValue<double>(data + k*valueFormatInt, val->format);
+                            minVal = (minVal < readVal ? minVal : readVal);
+                            maxVal = (maxVal > readVal ? maxVal : readVal);
                         }
                     }
 
@@ -79,10 +73,10 @@ namespace sereno
 #endif
                             for(uint32_t k = 0; k < val->nbTuples; k++)
                             {
-                                float mag = 0;
+                                double mag = 0;
                                 for(uint32_t j = 0; j < val->nbValuePerTuple; j++)
                                 {
-                                    float readVal = readParsedVTKValue<float>((uint8_t*)data + k*valueFormatInt*val->nbValuePerTuple + j*valueFormatInt, val->format);
+                                    double readVal = readParsedVTKValue<double>(data + k*valueFormatInt*val->nbValuePerTuple + j*valueFormatInt, val->format);
                                     mag = readVal*readVal;
                                 }
                                 
@@ -95,6 +89,7 @@ namespace sereno
 
                     m_pointFieldDescs[i].maxVal = maxVal;
                     m_pointFieldDescs[i].minVal = minVal;
+                    m_pointFieldDescs[i].values.reset(data);
                 }
 
                 std::cout << "End thread" << std::endl;
