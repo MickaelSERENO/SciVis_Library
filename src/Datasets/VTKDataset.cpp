@@ -61,8 +61,8 @@ namespace sereno
                             for(uint32_t k = 0; k < val->nbTuples; k++)
                             {
                                 float readVal = readParsedVTKValue<float>(data + k*valueFormatInt, val->format);
-                                minVal = fmin(minVal, readVal);
-                                maxVal = fmax(maxVal, readVal);
+                                minVal = std::min(minVal, readVal);
+                                maxVal = std::max(maxVal, readVal);
                             }
                         }
                     }
