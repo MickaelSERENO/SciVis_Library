@@ -92,7 +92,6 @@ namespace sereno
                     m_pointFieldDescs[i].values.reset(data);
                 }
 
-                std::cout << "End thread" << std::endl;
                 m_valuesLoaded = true;
                 if(clbk != NULL)
                     clbk(this, 1, data);
@@ -211,8 +210,7 @@ namespace sereno
         }
 
         //Reinitialize the image
-        for(uint32_t i=0; i < width*height; i++)
-            output[i] = 0;
+        memset(output, 0x00, sizeof(uint32_t)*width*height);
 
         //Fetch common values
         const PointFieldDesc& ptX = m_pointFieldDescs[ptFieldXID];
@@ -221,17 +219,16 @@ namespace sereno
         const float xDiv = ptX.maxVal - ptX.minVal;
         const float yDiv = ptY.maxVal - ptY.minVal;
 
-        uint8_t ptXFormat = VTKValueFormatInt(ptX.format);
-        uint8_t ptYFormat = VTKValueFormatInt(ptY.format);
+        const int ptXFormat = VTKValueFormatInt(ptX.format);
+        const int ptYFormat = VTKValueFormatInt(ptY.format);
 
         //Create a private histogram per thread. Work with this private histogram and merge at the end
-#if defined(_OPENMP)
+#ifdef _OPENMP
 #pragma omp parallel
         {
             //Initialize a private histogram
             uint32_t* privateHisto = (uint32_t*)malloc(sizeof(uint32_t)*width*height);
-            for(uint32_t i=0; i<width*height; i++) 
-                privateHisto[i] = 0;
+            memset(privateHisto, 0x00, sizeof(uint32_t)*width*height);
 
             //Make conditions OUTSIDE of the for loops for optimization issue
             //ptX.nbTuples == ptY.nbTuples
@@ -246,7 +243,7 @@ namespace sereno
                     float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat, ptY.format);
                     uint32_t y = MIN(height*(yVal-ptY.minVal)/yDiv, height-1);
 
-                    privateHisto[y*width + x]++;
+                    privateHisto[y*width + x]+=1;
                 }
             }
 
@@ -337,7 +334,7 @@ namespace sereno
                 uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                 float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat, ptY.format);
-                uint32_t y = MIN(height*(yVal-ptY.minVal)/YDiv, height-1);
+                uint32_t y = MIN(height*(yVal-ptY.minVal)/yDiv, height-1);
 
                 output[y*width + x]++;
             }
