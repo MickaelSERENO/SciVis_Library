@@ -32,142 +32,6 @@ namespace sereno
         return mag;
     }
 
-    /**
-     * \brief  Compute the gradient based on the raw values 
-     *
-     * \param vals the raw values
-     * \param ptsDesc the structured grid field descriptor
-     * \param ptFieldValue the point field descriptor (format, nbValuePerTuple).
-     * \param pMaxGrad pointer to a float to store the max gradient computed
-     *
-     * \return   
-     */
-    static float* computeGradient(uint8_t* vals, const VTKStructuredPoints& ptsDesc, const VTKFieldValue* ptFieldValue, float *pMaxGrad)
-    {
-        int formatSize = VTKValueFormatInt(ptFieldValue->format);
-
-        #define _READ_VTK_VALUE_SINGLE(x)    readParsedVTKValue<float>(vals + (x)*formatSize, ptFieldValue->format);
-
-        float* grads = (float*)malloc(sizeof(float)*ptsDesc.size[0]*ptsDesc.size[1]*ptsDesc.size[2]);
-
-        /*----------------------------------------------------------------------------*/
-        /*--------------------------Compute gradient values---------------------------*/
-        /*----------------------------------------------------------------------------*/
-        float maxGrad=0;
-        if(ptFieldValue->nbValuePerTuple == 1)
-        {
-#ifdef _OPENMP
-            #pragma omp parallel for reduction(max:maxGrad)
-#endif
-            for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
-                for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
-                    for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
-                    {
-                        uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
-
-                        float    x1  = _READ_VTK_VALUE_SINGLE(ind-1);
-                        float    x2  = _READ_VTK_VALUE_SINGLE(ind+1);
-                        float    y1  = _READ_VTK_VALUE_SINGLE(ind-ptsDesc.size[0]);
-                        float    y2  = _READ_VTK_VALUE_SINGLE(ind+ptsDesc.size[0]);
-                        float    z1  = _READ_VTK_VALUE_SINGLE(ind-ptsDesc.size[0]*ptsDesc.size[1]);
-                        float    z2  = _READ_VTK_VALUE_SINGLE(ind+ptsDesc.size[0]*ptsDesc.size[1]);
-
-                        float gradX = (x1-x2)/(2.0f*ptsDesc.spacing[0]);
-                        float gradY = (y1-y2)/(2.0f*ptsDesc.spacing[1]);
-                        float gradZ = (z1-z2)/(2.0f*ptsDesc.spacing[2]);
-
-                        float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
-                        gradMag = sqrt(gradMag);
-                        grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
-
-                        maxGrad = std::max(gradMag, maxGrad);
-                    }
-        }
-        else
-        {
-#ifdef _OPENMP
-            #pragma omp parallel for reduction(max:maxGrad)
-#endif
-            for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
-                for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
-                    for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
-                    {
-                        uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
-
-                        float    x1  = readVTKValueMagnitude(vals, ptFieldValue, ind-1);
-                        float    x2  = readVTKValueMagnitude(vals, ptFieldValue, ind+1);
-                        float    y1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]);
-                        float    y2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]);
-                        float    z1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]*ptsDesc.size[1]);
-                        float    z2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]*ptsDesc.size[1]);
-
-                        float gradX = (x1-x2)/(2.0f*ptsDesc.spacing[0]);
-                        float gradY = (y1-y2)/(2.0f*ptsDesc.spacing[1]);
-                        float gradZ = (z1-z2)/(2.0f*ptsDesc.spacing[2]);
-
-                        float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
-                        gradMag = sqrt(gradMag);
-                        grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
-
-                        maxGrad = std::max(gradMag, maxGrad);
-                    }
-
-        }
-
-        /*----------------------------------------------------------------------------*/
-        /*---------------Compute gradient values for Edge (grad = 0.0f)---------------*/
-        /*----------------------------------------------------------------------------*/
-
-#ifdef _OPENMP
-        #pragma omp parallel
-#endif
-        {
-            //for k = 0 and k = max
-#ifdef _OPENMP
-            #pragma omp for
-#endif
-            for(uint32_t j = 0; j < ptsDesc.size[1]; j++)
-                for(uint32_t i = 0; i < ptsDesc.size[0]; i++)
-                {
-                    uint32_t offset = (ptsDesc.size[2]-1)*ptsDesc.size[0]*ptsDesc.size[1];
-                    grads[(i+j*ptsDesc.size[0])]        = 0.0f;
-                    grads[(i+j*ptsDesc.size[0]+offset)] = 0.0f;
-                }
-
-            //for j = 0 and j = max
-#ifdef _OPENMP
-            #pragma omp for
-#endif
-            for(uint32_t k = 0; k < ptsDesc.size[2]; k++)
-                for(uint32_t i = 0; i < ptsDesc.size[0]; i++)
-                {
-                    uint32_t offset = (ptsDesc.size[1]-1)*ptsDesc.size[0];
-                    grads[(i+k*ptsDesc.size[0]*ptsDesc.size[1])]        = 0.0f;
-                    grads[(i+k*ptsDesc.size[0]*ptsDesc.size[1]+offset)] = 0.0f;
-                }
-
-            //for i = 0 and i = max
-#ifdef _OPENMP
-            #pragma omp for
-#endif
-            for(uint32_t k = 0; k < ptsDesc.size[2]; k++)
-                for(uint32_t j = 0; j < ptsDesc.size[1]; j++)
-                {
-                    uint32_t offset = ptsDesc.size[0]-1;
-                    grads[(j*ptsDesc.size[0]+
-                            k*ptsDesc.size[0]*ptsDesc.size[1])]        = 0.0f;
-                    grads[(j*ptsDesc.size[0]+
-                            k*ptsDesc.size[0]*ptsDesc.size[1]+offset)] = 0.0f;
-                }
-        }
-
-        if(pMaxGrad)
-            *pMaxGrad = maxGrad;
-
-        return grads;
-        #undef _READ_VTK_VALUE_SINGLE
-    }
-
     VTKDataset::VTKDataset(std::shared_ptr<VTKParser>& parser, const std::vector<const VTKFieldValue*>& ptFieldValues, 
                            const std::vector<const VTKFieldValue*>& cellFieldValues) : m_ptFieldValues(ptFieldValues), m_cellFieldValues(cellFieldValues), m_parser(parser)
     {
@@ -251,10 +115,11 @@ namespace sereno
                     m_pointFieldDescs[i].maxVal = maxVal;
                     m_pointFieldDescs[i].minVal = minVal;
                     m_pointFieldDescs[i].values.reset(data);
-
-                    m_pointFieldDescs[i].gradVal.reset(computeGradient(data, m_parser->getStructuredPointsDescriptor(), val, &m_pointFieldDescs[i].maxGrad));
                 }
 
+                computeMultiDGradient();
+
+                //Computation done, se the state to "loaded" and call the callback function
                 m_valuesLoaded = true;
                 if(clbk != NULL)
                     clbk(this, 1, data);
@@ -262,6 +127,205 @@ namespace sereno
             });
         }
     }
+
+    void VTKDataset::computeMultiDGradient()
+    {
+        const VTKStructuredPoints& ptsDesc = m_parser->getStructuredPointsDescriptor();
+        float* grads = (float*)malloc(sizeof(float)*ptsDesc.size[0]*ptsDesc.size[1]*ptsDesc.size[2]);
+
+        /*----------------------------------------------------------------------------*/
+        /*--------------------------Compute gradient values---------------------------*/
+        /*----------------------------------------------------------------------------*/
+        float maxGrad=0;
+        if(m_pointFieldDescs.size() > 1)
+        {
+            //The Df matrice, see the doxygen
+            float* df = (float*)malloc(sizeof(float)*3*m_pointFieldDescs.size());
+#ifdef _OPENMP
+            #pragma omp parallel for reduction(max:maxGrad)
+#endif
+            for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
+                for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
+                    for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
+                    {
+                        uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
+
+                        for(uint32_t l = 0; l < m_pointFieldDescs.size(); l++)
+                        {
+                            const VTKFieldValue* ptFieldValue = m_ptFieldValues[l];
+                            int formatSize = VTKValueFormatInt(ptFieldValue->format);
+                            uint8_t* vals = (uint8_t*)m_pointFieldDescs[l].values.get();
+
+                            if(ptFieldValue->nbValuePerTuple == 1)
+                            {
+                                float    x1  = readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue->format);
+                                float    x2  = readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue->format);
+                                float    y1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0])*formatSize, ptFieldValue->format);
+                                float    y2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0])*formatSize, ptFieldValue->format);
+                                float    z1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue->format);
+                                float    z2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue->format);
+
+                                float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
+                                float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
+                                float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+                                
+                                df[3*l+0] = gradX;
+                                df[3*l+1] = gradY;
+                                df[3*l+2] = gradZ;
+                            }
+                            else
+                            {
+                                float    x1  = readVTKValueMagnitude(vals, ptFieldValue, ind-1);
+                                float    x2  = readVTKValueMagnitude(vals, ptFieldValue, ind+1);
+                                float    y1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]);
+                                float    y2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]);
+                                float    z1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]*ptsDesc.size[1]);
+                                float    z2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]*ptsDesc.size[1]);
+
+                                float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
+                                float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
+                                float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+
+                                df[3*l+0] = gradX;
+                                df[3*l+1] = gradY;
+                                df[3*l+2] = gradZ;
+                            }
+                        }
+
+                        float g[9] = {0}; //(Df)^T . Df
+                        for(uint32_t n = 0; n < m_pointFieldDescs.size(); n++)
+                            for(uint32_t l = 0; l < 3; l++)
+                                for(uint32_t m = 0; m < 3; m++)
+                                    g[3*l+m] += df[3*n+l]*df[3*n+m];
+
+                        float gradMag = 0;
+                        for(uint32_t l = 0; l < 9; l++)
+                            gradMag += g[l]*g[l];
+
+                        gradMag = sqrt(gradMag);
+                        grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
+
+                        maxGrad = std::max(gradMag, maxGrad);
+                    }
+
+            free(df);
+        }
+        else if(m_ptFieldValues.size() == 1)
+        {
+            const VTKFieldValue* ptFieldValue = m_ptFieldValues[0];
+            int formatSize = VTKValueFormatInt(ptFieldValue->format);
+            uint8_t* vals = (uint8_t*)m_pointFieldDescs[0].values.get();
+
+            if(ptFieldValue->nbValuePerTuple == 1)
+            {
+#ifdef _OPENMP
+                #pragma omp parallel for reduction(max:maxGrad)
+#endif
+                for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
+                    for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
+                        for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
+                        {
+                            uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
+
+                            float    x1  = readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue->format);
+                            float    x2  = readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue->format);
+                            float    y1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0])*formatSize, ptFieldValue->format);
+                            float    y2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0])*formatSize, ptFieldValue->format);
+                            float    z1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue->format);
+                            float    z2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue->format);
+
+                            float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
+                            float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
+                            float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+
+                            float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
+                            gradMag = sqrt(gradMag);
+                            grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
+                            maxGrad = std::max(gradMag, maxGrad);
+                        }
+            }
+
+            else
+            {
+#ifdef _OPENMP
+                #pragma omp parallel for reduction(max:maxGrad)
+#endif
+                for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
+                    for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
+                        for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
+                        {
+                            uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
+
+                            float    x1  = readVTKValueMagnitude(vals, ptFieldValue, ind-1);
+                            float    x2  = readVTKValueMagnitude(vals, ptFieldValue, ind+1);
+                            float    y1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]);
+                            float    y2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]);
+                            float    z1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]*ptsDesc.size[1]);
+                            float    z2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]*ptsDesc.size[1]);
+
+                            float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
+                            float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
+                            float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+
+                            float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
+                            gradMag = sqrt(gradMag);
+                            grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
+                            maxGrad = std::max(gradMag, maxGrad);
+                        }
+            }
+        }
+
+        /*----------------------------------------------------------------------------*/
+        /*---------------Compute gradient values for Edge (grad = 0.0f)---------------*/
+        /*----------------------------------------------------------------------------*/
+
+#ifdef _OPENMP
+        #pragma omp parallel
+#endif
+        {
+            //for k = 0 and k = max
+#ifdef _OPENMP
+            #pragma omp for
+#endif
+            for(uint32_t j = 0; j < ptsDesc.size[1]; j++)
+                for(uint32_t i = 0; i < ptsDesc.size[0]; i++)
+                {
+                    uint32_t offset = (ptsDesc.size[2]-1)*ptsDesc.size[0]*ptsDesc.size[1];
+                    grads[(i+j*ptsDesc.size[0])]        = 0.0f;
+                    grads[(i+j*ptsDesc.size[0]+offset)] = 0.0f;
+                }
+
+            //for j = 0 and j = max
+#ifdef _OPENMP
+            #pragma omp for
+#endif
+            for(uint32_t k = 0; k < ptsDesc.size[2]; k++)
+                for(uint32_t i = 0; i < ptsDesc.size[0]; i++)
+                {
+                    uint32_t offset = (ptsDesc.size[1]-1)*ptsDesc.size[0];
+                    grads[(i+k*ptsDesc.size[0]*ptsDesc.size[1])]        = 0.0f;
+                    grads[(i+k*ptsDesc.size[0]*ptsDesc.size[1]+offset)] = 0.0f;
+                }
+
+            //for i = 0 and i = max
+#ifdef _OPENMP
+            #pragma omp for
+#endif
+            for(uint32_t k = 0; k < ptsDesc.size[2]; k++)
+                for(uint32_t j = 0; j < ptsDesc.size[1]; j++)
+                {
+                    uint32_t offset = ptsDesc.size[0]-1;
+                    grads[(j*ptsDesc.size[0]+
+                            k*ptsDesc.size[0]*ptsDesc.size[1])]        = 0.0f;
+                    grads[(j*ptsDesc.size[0]+
+                            k*ptsDesc.size[0]*ptsDesc.size[1]+offset)] = 0.0f;
+                }
+        }
+
+        m_maxGrad = maxGrad;
+        m_grads.reset(grads);
+    }
+
 
     bool VTKDataset::create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const
     {

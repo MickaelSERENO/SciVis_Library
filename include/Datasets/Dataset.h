@@ -188,6 +188,8 @@ namespace sereno
 
             std::vector<SubDataset*>    m_subDatasets;     /*!< Array of sub datasets*/
             std::vector<PointFieldDesc> m_pointFieldDescs; /*!< Array of point field data*/
+            std::unique_ptr<float, _FreeDeleter> m_grads;  /*!< The gradient array*/
+            float    m_maxGrad = 0; /*!< The maximum gradient computed*/
             uint32_t m_curSDID = 0; /*!< The current SubDataset ID*/
             bool     m_valuesLoaded = false; /*!< Are the values parsed?*/
     };

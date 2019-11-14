@@ -75,20 +75,6 @@ namespace sereno
                 return std::min(m_alphaMax*exp(-rMag)*255, 255.0f);
             }
 
-            /* \brief  Compute the RGB color of this transfer function. The color is the length of the indice, gradient discarded (size(indice) == m_dim-1)
-             * \param ind the normalized indice of the transfer function. Must be at least of size = getDim
-             * \param colOut[out] the RGB color output. Minimum size: 3*/
-            virtual void computeColor(float* ind, uint8_t* colOut) const
-            {
-                //float mag = 0;
-                //for(uint32_t i = 0; i < m_dim-1; i++)
-                //    mag += ind[i]*ind[i];
-                //mag = sqrt(mag/m_dim-1);
-                Color c = SciVis_computeColor(m_mode, ind[0]);
-                for(int i = 0; i < 3; i++)
-                    colOut[i] = std::min(255.0f, std::max(0.0f, 255.0f*c[i]));
-            }
-
             /* \brief  Get the scale applied
              * \return  the scale */
             const float* getScale()  const {return m_scale;}
@@ -112,7 +98,6 @@ namespace sereno
             /* \brief  Set the alpha max of the GTF
              * \param alphaMax the alpha max */
             void setAlphaMax(float alphaMax) {m_alphaMax = alphaMax;}
-
         private:
             float* m_scale    = NULL; /*!< The scaling factor of the GTF*/
             float* m_center   = NULL; /*!< The center of the GTF*/

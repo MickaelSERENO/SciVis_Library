@@ -70,6 +70,19 @@ namespace sereno
 
             virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const;
         private:
+
+            /** \brief  Compute the multi-dimensional "gradient magnitude". Call it AFTER loading the data
+             * This function generate the L2 norm of delta = (Df)^T . Df, with 
+             *
+             *      |dF1/dx   dF1/dy   dF1/dz|
+             * Df = |......   ......   ......|
+             *      |dFn/dx   dFn/dy   dFn/dz|
+             *
+             * See Joe Kniss, Gordon Kindlmann, and Charles Hansen. 2002. Multidimensional Transfer Functions for Interactive Volume Rendering. IEEE Transactions on Visualization and Computer Graphics 8, 3 (July 2002)
+             *
+             */
+            virtual void computeMultiDGradient();
+
             std::vector<const VTKFieldValue*> m_ptFieldValues;     /*!< The point field values*/
             std::vector<const VTKFieldValue*> m_cellFieldValues;   /*!< The cell  field values*/
             std::shared_ptr<VTKParser>        m_parser;            /*!< The VTK parser*/
