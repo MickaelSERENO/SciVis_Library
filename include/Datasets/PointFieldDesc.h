@@ -22,7 +22,7 @@ namespace sereno
         uint32_t id;                                 /*!< The point field ID as defined by the Dataset*/
         float    minVal;                             /*!< The point field minimum value*/
         float    maxVal;                             /*!< The point field maximum value*/
-        std::unique_ptr<void, _FreeDeleter> values;  /*!< The raw value pointers. The value was allocated using malloc. For vector, values == magnitude values*/
+        std::unique_ptr<void, _FreeDeleter> values;  /*!< The raw value pointers of the data read from disk (usually)*/
     };
 }
 

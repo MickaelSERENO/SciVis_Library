@@ -78,7 +78,7 @@ namespace sereno
                     r1Mag += r*r;
                 }
 
-                return std::min(m_alphaMax*exp(-r1Mag)*255, 255.0f);
+                return std::min(m_alphaMax*exp(-r1Mag)*255, 255.0);
             }
 
             void computeColor(float* ind, uint8_t* colOut) const

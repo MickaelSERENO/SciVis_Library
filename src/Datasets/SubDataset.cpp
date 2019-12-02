@@ -3,7 +3,7 @@
 
 namespace sereno
 {
-    SubDataset::SubDataset(Dataset* parent, const std::string& name, uint32_t id) :  m_amplitude{std::numeric_limits<float>::max(), std::numeric_limits<float>::min()}, m_name(name)
+    SubDataset::SubDataset(Dataset* parent, const std::string& name, uint32_t id) : m_name(name)
 #ifdef SNAPSHOT
         , m_snapshot(nullptr)
 #endif
@@ -22,12 +22,6 @@ namespace sereno
         if(this != &sd)
         {
             m_isValid   = sd.m_isValid;
-            m_minClamp  = sd.m_minClamp;
-            m_isValid   = sd.m_isValid;
-            m_minClamp  = sd.m_minClamp;
-            m_maxClamp  = sd.m_maxClamp;
-            for(uint8_t i = 0; i < 2; i++)
-                m_amplitude[i] = sd.m_amplitude[i];
             m_rotation  = sd.m_rotation;
             m_position  = sd.m_position;
             m_scale     = sd.m_scale;
@@ -46,12 +40,6 @@ namespace sereno
 
     SubDataset::~SubDataset()
     {
-    }
-
-    void SubDataset::setClamping(float min, float max)
-    {
-        m_minClamp  = min;
-        m_maxClamp  = max;
     }
 
     Annotation* SubDataset::emplaceAnnotation(uint32_t w, uint32_t h, float* position)

@@ -26,4 +26,12 @@ namespace sereno
         while(m_subDatasets.size() != 0)
             removeSubDataset(m_subDatasets.back());
     }
+
+    uint32_t Dataset::getTFIndiceFromPointFieldID(uint32_t pID)
+    {
+        for(uint32_t i = 0; i < m_pointFieldDescs.size(); i++)
+            if(m_pointFieldDescs[i].id == pID)
+                return i;
+        return -1;
+    }
 }

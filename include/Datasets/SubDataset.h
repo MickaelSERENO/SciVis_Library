@@ -39,11 +39,6 @@ namespace sereno
 
             virtual ~SubDataset();
 
-            /** \brief Set the clamping of this dataset at rendering time
-             * \param min the minimum clamping
-             * \param max the maximum clamping*/
-            void setClamping(float min, float max);
-
             /* \brief Set the global rotation of this fluid dataset
              * \param quat the global rotation quaternion to apply */
             void setGlobalRotate(const Quaternionf& quat) {m_rotation = quat;}
@@ -51,22 +46,6 @@ namespace sereno
             /* \brief Get the global rotation quaternion of this dataset
              * \return a reference to the global rotation quaternion of this dataset */
             const Quaternionf& getGlobalRotate() const {return m_rotation;}
-
-            /* \brief Get the minimum clamping value in ratio (0.0, 1.0)
-             * \return the minimum clamping value */
-            float     getMinClamping() const {return m_minClamp;}
-
-            /* \brief Get the maximum clamping value in ratio (0.0, 1.0)
-             * \return the maximum clamping value */
-            float     getMaxClamping() const {return m_maxClamp;}
-
-            /* \brief Get the minimum amplitude of this dataset
-             * \return the minimum amplitude */
-            float getMinAmplitude() const {return m_amplitude[0];}
-
-            /* \brief Get the maximum amplitude of this dataset
-             * \return the maximum amplitude */
-            float getMaxAmplitude() const {return m_amplitude[1];}
 
             /* \brief Is this dataset valid ? */
             bool isValid() const {return m_isValid;}
@@ -78,10 +57,6 @@ namespace sereno
             /** \brief  Get the parent dataset
              * \return  the parent dataset */
             const Dataset* getParent() const {return m_parent;}
-
-            /** \brief Set the sub dataset amplitude
-             * \param amp the new amplitude*/
-            void setAmplitude(float* amp) {m_amplitude[0] = amp[0]; m_amplitude[1] = amp[1];}
 
             /* \brief  Get the 3D position of this sub dataset
              * \return  const reference of the 3D position*/
@@ -158,9 +133,6 @@ namespace sereno
             uint32_t getID() const {return m_id;}
         protected:
             bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
-            float       m_minClamp       = 0.0f;               /*!< The minimum color clamping*/
-            float       m_maxClamp       = 1.0f;               /*!< The maximum color clamping (ratio : 0.0f 1.0)*/
-            float       m_amplitude[2];                        /*!< The dataset amplitude*/
             Quaternionf m_rotation;                            /*!< The quaternion rotation*/
             glm::vec3   m_position = glm::vec3(0.0, 0.0, 0.0); /*!< The small multiple position*/
             glm::vec3   m_scale    = glm::vec3(1.0, 1.0, 1.0); /*!< The 3D scaling*/
@@ -173,7 +145,6 @@ namespace sereno
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
 #endif
-
         private:
             /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
              * \param id the new ID */

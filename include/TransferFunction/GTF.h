@@ -72,7 +72,7 @@ namespace sereno
                     rMag += r*r;
                 }
 
-                return std::min(m_alphaMax*exp(-rMag)*255, 255.0f);
+                return std::min(m_alphaMax*exp(-rMag)*255, 255.0);
             }
 
             /* \brief  Get the scale applied

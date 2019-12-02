@@ -136,6 +136,20 @@ namespace sereno
                 return m_pointFieldDescs;
             }
 
+            /** \brief  Get the gradient data value.
+             * \return  The gradient data pointer. The size of the array depends on the dataset.  */
+            const float* getGradient() const
+            {
+                return m_grads.get();
+            }
+
+            /** \brief  Get the maximum computed gradient value
+             * \return    the maximum computer gradient value */
+            float getMaxGradientValue() const
+            {
+                return m_maxGrad;
+            }
+
             /* \brief  Load the values of the Dataset in a separated thread.
              * \param clbk the callback function to call when the loading is finished
              * \param data extra data to send to the callback function*/
@@ -144,6 +158,12 @@ namespace sereno
             /* \brief  Are the values loaded?
              * \return   true if yes, false otherwise */
             bool areValuesLoaded() const {return m_valuesLoaded;}
+
+            /**
+             * \brief  Get the Transfer Function indice to use based on the pID
+             * \param pID the pID to evaluate
+             * \return   the transfer function indice corresponding. -1 if not found */
+            virtual uint32_t getTFIndiceFromPointFieldID(uint32_t pID);
 
             /**
              * \brief  Create a 1D histogram
@@ -167,17 +187,6 @@ namespace sereno
              * \return true on success, false on failure. If failed, output will not be touched */
             virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const = 0;
         protected:
-            /**
-             * \brief  Set the subdataset amplitude using friendship
-             * \param dataset the subdataset to modify
-             * \param amplitude the new amplitude array
-             */
-            void setSubDatasetAmplitude(SubDataset* dataset, float* amplitude)
-            {
-                dataset->m_amplitude[0] = amplitude[0];
-                dataset->m_amplitude[1] = amplitude[1];
-            }
-
             /** \brief  Set the subdataset validity using friendship
              * \param dataset the subdataset to modify
              * \param isValid the new validity*/
