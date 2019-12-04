@@ -119,7 +119,7 @@ namespace sereno
 
                 computeMultiDGradient();
 
-                //Computation done, se the state to "loaded" and call the callback function
+                //Computation done, set the state to "loaded" and call the callback function
                 m_valuesLoaded = true;
                 if(clbk != NULL)
                     clbk(this, 1, data);
@@ -140,83 +140,85 @@ namespace sereno
         if(m_pointFieldDescs.size() > 1)
         {
             //The Df matrice, see the doxygen
-            float* df = (float*)malloc(sizeof(float)*3*m_pointFieldDescs.size());
 #ifdef _OPENMP
-            #pragma omp parallel for reduction(max:maxGrad)
+            #pragma omp parallel reduction(max:maxGrad)
 #endif
-            for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
-                for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
-                    for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
-                    {
-                        uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
+            {
+                float* df = (float*)malloc(sizeof(float)*3*m_pointFieldDescs.size());
 
-                        for(uint32_t l = 0; l < m_pointFieldDescs.size(); l++)
+#ifdef _OPENMP
+                #pragma omp for
+#endif
+                for(uint32_t k = 1; k < ptsDesc.size[2]-1; k++)
+                    for(uint32_t j = 1; j < ptsDesc.size[1]-1; j++)
+                        for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
                         {
-                            const PointFieldDesc& ptFieldValue = m_pointFieldDescs[l];
-                            int formatSize = VTKValueFormatInt(ptFieldValue.format);
-                            uint8_t* vals = (uint8_t*)m_pointFieldDescs[l].values.get();
+                            uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
 
-                            if(ptFieldValue.nbValuePerTuple == 1)
+                            for(uint32_t l = 0; l < m_pointFieldDescs.size(); l++)
                             {
-                                float    x1  = (readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue.format))/
-                                               (ptFieldValue.maxVal-ptFieldValue.minVal);
-                                float    x2  = (readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue.format))/
-                                               (ptFieldValue.maxVal-ptFieldValue.minVal);
-                                float    y1  = (readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0])*formatSize, ptFieldValue.format))/
-                                               (ptFieldValue.maxVal-ptFieldValue.minVal);
-                                float    y2  = (readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0])*formatSize, ptFieldValue.format))/
-                                               (ptFieldValue.maxVal-ptFieldValue.minVal);
-                                float    z1  = (readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format))/
-                                               (ptFieldValue.maxVal-ptFieldValue.minVal);
-                                float    z2  = (readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format))/
-                                               (ptFieldValue.maxVal-ptFieldValue.minVal);
+                                const PointFieldDesc& ptFieldValue = m_pointFieldDescs[l];
+                                int formatSize = VTKValueFormatInt(ptFieldValue.format);
+                                uint8_t* vals = (uint8_t*)m_pointFieldDescs[l].values.get();
 
+                                if(ptFieldValue.nbValuePerTuple == 1)
+                                {
+                                    float    x1  = readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue.format);
+                                    float    x2  = readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue.format);
+                                    float    y1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0])*formatSize, ptFieldValue.format);
+                                    float    y2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0])*formatSize, ptFieldValue.format);
+                                    float    z1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format);
+                                    float    z2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format);
 
-                                float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
-                                float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
-                                float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
-                                
-                                df[3*l+0] = gradX;
-                                df[3*l+1] = gradY;
-                                df[3*l+2] = gradZ;
+                                    float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
+                                    float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
+                                    float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+                                    
+                                    df[3*l+0] = gradX/(ptFieldValue.maxVal-ptFieldValue.minVal);
+                                    df[3*l+1] = gradY/(ptFieldValue.maxVal-ptFieldValue.minVal);
+                                    df[3*l+2] = gradZ/(ptFieldValue.maxVal-ptFieldValue.minVal);
+                                }
+
+                                else
+                                {
+                                    float    x1  = readVTKValueMagnitude(vals, ptFieldValue, ind-1);
+                                    float    x2  = readVTKValueMagnitude(vals, ptFieldValue, ind+1);
+                                    float    y1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]);
+                                    float    y2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]);
+                                    float    z1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]*ptsDesc.size[1]);
+                                    float    z2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]*ptsDesc.size[1]);
+
+                                    float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
+                                    float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
+                                    float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+
+                                    df[3*l+0] = gradX;
+                                    df[3*l+1] = gradY;
+                                    df[3*l+2] = gradZ;
+                                }
                             }
 
-                            else
-                            {
-                                float    x1  = readVTKValueMagnitude(vals, ptFieldValue, ind-1);
-                                float    x2  = readVTKValueMagnitude(vals, ptFieldValue, ind+1);
-                                float    y1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]);
-                                float    y2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]);
-                                float    z1  = readVTKValueMagnitude(vals, ptFieldValue, ind-ptsDesc.size[0]*ptsDesc.size[1]);
-                                float    z2  = readVTKValueMagnitude(vals, ptFieldValue, ind+ptsDesc.size[0]*ptsDesc.size[1]);
+                            float g[9]; //(Df)^T . Df
+                            for(uint32_t l = 0; l < 9; l++)
+                                g[l] = 0.0f;
+                            
+                            for(uint32_t n = 0; n < m_pointFieldDescs.size(); n++)
+                                for(uint32_t l = 0; l < 3; l++)
+                                    for(uint32_t m = 0; m < 3; m++)
+                                        g[3*l+m] += df[3*n+l]*df[3*n+m];
 
-                                float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
-                                float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
-                                float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+                            float gradMag = 0; //L2 norm
+                            for(uint32_t l = 0; l < 9; l++)
+                                gradMag += g[l]*g[l];
 
-                                df[3*l+0] = gradX;
-                                df[3*l+1] = gradY;
-                                df[3*l+2] = gradZ;
-                            }
+                            gradMag = sqrt(gradMag);
+                            grads[ind] = gradMag;
+
+                            maxGrad = std::max(gradMag, maxGrad);
                         }
 
-                        float g[9] = {0}; //(Df)^T . Df
-                        for(uint32_t n = 0; n < m_pointFieldDescs.size(); n++)
-                            for(uint32_t l = 0; l < 3; l++)
-                                for(uint32_t m = 0; m < 3; m++)
-                                    g[3*l+m] += df[3*n+l]*df[3*n+m];
-
-                        float gradMag = 0; //L2 norm
-                        for(uint32_t l = 0; l < 9; l++)
-                            gradMag += g[l]*g[l];
-
-                        gradMag = sqrt(gradMag);
-                        grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
-
-                        maxGrad = std::max(gradMag, maxGrad);
-                    }
-
-            free(df);
+                free(df);
+            }
         }
         else if(m_ptFieldValues.size() == 1)
         {
@@ -235,26 +237,24 @@ namespace sereno
                         {
                             uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
 
-                            float    x1  = (readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue.format))/
-                                           (ptFieldValue.maxVal-ptFieldValue.minVal);
-                            float    x2  = (readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue.format))/
-                                           (ptFieldValue.maxVal-ptFieldValue.minVal);
-                            float    y1  = (readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0])*formatSize, ptFieldValue.format))/
-                                           (ptFieldValue.maxVal-ptFieldValue.minVal);
-                            float    y2  = (readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0])*formatSize, ptFieldValue.format))/
-                                           (ptFieldValue.maxVal-ptFieldValue.minVal);
-                            float    z1  = (readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format))/
-                                           (ptFieldValue.maxVal-ptFieldValue.minVal);
-                            float    z2  = (readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format))/
-                                           (ptFieldValue.maxVal-ptFieldValue.minVal);
+                            float    x1  = readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue.format);
+                            float    x2  = readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue.format);
+                            float    y1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0])*formatSize, ptFieldValue.format);
+                            float    y2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0])*formatSize, ptFieldValue.format);
+                            float    z1  = readParsedVTKValue<float>(vals + (ind-ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format);
+                            float    z2  = readParsedVTKValue<float>(vals + (ind+ptsDesc.size[0]*ptsDesc.size[1])*formatSize, ptFieldValue.format);
 
                             float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
                             float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
                             float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
 
+                            gradX = gradX/(ptFieldValue.maxVal-ptFieldValue.minVal);
+                            gradY = gradY/(ptFieldValue.maxVal-ptFieldValue.minVal);
+                            gradZ = gradZ/(ptFieldValue.maxVal-ptFieldValue.minVal);
+
                             float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
                             gradMag = sqrt(gradMag);
-                            grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
+                            grads[ind] = gradMag;
                             maxGrad = std::max(gradMag, maxGrad);
                         }
             }
@@ -283,7 +283,7 @@ namespace sereno
 
                             float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
                             gradMag = sqrt(gradMag);
-                            grads[i+j*ptsDesc.size[0]+k*ptsDesc.size[1]*ptsDesc.size[2]] = gradMag;
+                            grads[ind] = gradMag;
                             maxGrad = std::max(gradMag, maxGrad);
                         }
             }

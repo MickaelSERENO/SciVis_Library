@@ -66,7 +66,7 @@ namespace sereno
              */
             uint8_t computeAlpha(float* ind) const
             {
-                if(ind[m_dim-1] == 0)
+                if(ind[m_dim-1] < 1e-4)
                     return 0;
 
                 float r0 = 1.f/ind[m_dim-1];
@@ -74,11 +74,14 @@ namespace sereno
 
                 for(uint32_t i = 0; i < m_dim-1; i++)
                 {
-                    float r = r0*m_scale[i]*(ind[i] - m_center[i]);
-                    r1Mag += r*r;
+                    if(m_scale[i] != 0)
+                    {
+                        float r = r0*m_scale[i]*(ind[i] - m_center[i]);
+                        r1Mag += r*r;
+                    }
                 }
 
-                return std::min(m_alphaMax*exp(-r1Mag)*255, 255.0);
+                return std::min<float>(m_alphaMax*exp(-r1Mag)*255, 255.0f);
             }
 
             void computeColor(float* ind, uint8_t* colOut) const
@@ -114,12 +117,20 @@ namespace sereno
              * \brief  Set the scaling along each axis of the TriangularGTF
              * \param scale the scaling along each axis of the TriangularGTF
              */
-            void setScale(float* scale) {for(uint8_t i = 0; i < m_dim-1; i++) m_scale[i] = scale[i];}
+            void setScale(float* scale) 
+            {
+                for(uint8_t i = 0; i < m_dim-1; i++) 
+                    m_scale[i] = scale[i];
+            }
             /**
              * \brief  Set the center of the TriangularGTF
              * \param center the center of the TriangularGTF
              */
-            void setCenter(float* center) {for(uint8_t i = 0; i < m_dim-1; i++) m_center[i] = center[i];}
+            void setCenter(float* center) 
+            {
+                for(uint8_t i = 0; i < m_dim-1; i++) 
+                    m_center[i] = center[i];
+            }
             /**
              * \brief  Set the alpha max of the TriangularGTF
              * \param alphaMax the alpha max
