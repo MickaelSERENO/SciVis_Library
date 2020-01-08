@@ -10,8 +10,8 @@ namespace sereno
     class TriangularGTF : public TF
     {
         public:
-            /** \brief  Constructor. Set scale at 1.0f, center at 0.0 and alphaMax at 1.0 */
-            TriangularGTF(uint32_t dim, ColorMode mode) : TF(dim, mode), m_alphaMax(1.0f)
+            /** \brief  Constructor. Set scale at 0.5f, center at 0.5 and alphaMax at 0.5 */
+            TriangularGTF(uint32_t dim, ColorMode mode) : TF(dim, mode), m_alphaMax(0.5f)
             {
                 m_scale  = (float*)malloc(sizeof(float)*(dim-1));
                 m_center = (float*)malloc(sizeof(float)*(dim-1));
