@@ -68,8 +68,11 @@ namespace sereno
                 float rMag = 0;
                 for(uint32_t i = 0; i < m_dim; i++)
                 {
-                    float r = m_scale[i]*(ind[i] - m_center[i]);
-                    rMag += r*r;
+                    if(m_scale[i] != 0.0f)
+                    {
+                        float r = (ind[i] - m_center[i])/m_scale[i];
+                        rMag += r*r;
+                    }
                 }
 
                 return std::min<float>(m_alphaMax*exp(-rMag)*255, 255.0f);

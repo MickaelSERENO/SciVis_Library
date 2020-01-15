@@ -76,7 +76,7 @@ namespace sereno
                 {
                     if(m_scale[i] != 0)
                     {
-                        float r = r0*m_scale[i]*(ind[i] - m_center[i]);
+                        float r = r0*(ind[i] - m_center[i])/m_scale[i];
                         r1Mag += r*r;
                     }
                 }
