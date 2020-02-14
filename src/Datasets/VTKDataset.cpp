@@ -52,6 +52,8 @@ namespace sereno
     {
         if(m_readThread.joinable())
             m_readThread.join();
+        if(m_mask)
+            free(m_mask);
     }
 
     void VTKDataset::loadValues(LoadCallback clbk, void* data)
@@ -61,6 +63,25 @@ namespace sereno
             m_readThreadRunning = true;
             m_readThread = std::thread([this, clbk, data]()
             {
+                //Get the mask
+                for(const VTKFieldValue* val : m_parser->getPointFieldValueDescriptors())
+                {
+                    //Search with the name
+                    if(val->name == "vtkValidPointMask" && val->nbValuePerTuple == 1)
+                    {
+                        //Save some space by using 1 bit == 1 value
+                        uint8_t* maskData = (uint8_t*)m_parser->parseAllFieldValues(val);
+                        m_mask = (uint8_t*)calloc((val->nbTuples+7)/8, sizeof(uint8_t));
+                        for(uint32_t i = 0, k=0; i < val->nbTuples; k++)
+                            for(uint32_t j = 0; j < 8 && i < val->nbTuples; j++, i++)
+                                if(maskData[i]) 
+                                    m_mask[k] |= (1 << j);
+
+                        free(maskData);
+                        break;
+                    }
+                }
+
                 for(uint32_t i = 0; i < m_ptFieldValues.size(); i++)
                 {
                     const VTKFieldValue* val = m_ptFieldValues[i];
@@ -80,9 +101,12 @@ namespace sereno
 #endif
                         for(uint32_t k = 0; k < val->nbTuples; k++)
                         {
-                            double readVal = readParsedVTKValue<double>(data + k*valueFormatInt, val->format);
-                            minVal = (minVal < readVal ? minVal : readVal);
-                            maxVal = (maxVal > readVal ? maxVal : readVal);
+                            if(getMask(k))
+                            {
+                                double readVal = readParsedVTKValue<double>(data + k*valueFormatInt, val->format);
+                                minVal = (minVal < readVal ? minVal : readVal);
+                                maxVal = (maxVal > readVal ? maxVal : readVal);
+                            }
                         }
                     }
 
@@ -98,6 +122,8 @@ namespace sereno
 #endif
                             for(uint32_t k = 0; k < val->nbTuples; k++)
                             {
+                                if(!getMask(k))
+                                    continue;
                                 double mag = 0;
                                 for(uint32_t j = 0; j < val->nbValuePerTuple; j++)
                                 {
@@ -155,6 +181,11 @@ namespace sereno
                         {
                             uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
 
+                            if(!getMask(ind))
+                            {
+                                grads[ind] = 0;
+                                continue;
+                            }
                             for(uint32_t l = 0; l < m_pointFieldDescs.size(); l++)
                             {
                                 const PointFieldDesc& ptFieldValue = m_pointFieldDescs[l];
@@ -236,6 +267,11 @@ namespace sereno
                         for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
                         {
                             uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
+                            if(!getMask(ind))
+                            {
+                                grads[ind] = 0;
+                                continue;
+                            }
 
                             float    x1  = readParsedVTKValue<float>(vals + (ind-1)*formatSize, ptFieldValue.format);
                             float    x2  = readParsedVTKValue<float>(vals + (ind+1)*formatSize, ptFieldValue.format);
@@ -269,6 +305,11 @@ namespace sereno
                         for(uint32_t i = 1; i < ptsDesc.size[0]-1; i++)
                         {
                             uint32_t ind = i + j*ptsDesc.size[0] + k*ptsDesc.size[0]*ptsDesc.size[1];
+                            if(!getMask(ind))
+                            {
+                                grads[ind] = 0;
+                                continue;
+                            }
 
                             float    x1  = readVTKValueMagnitude(vals, ptFieldValue, ind-1);
                             float    x2  = readVTKValueMagnitude(vals, ptFieldValue, ind+1);

@@ -69,6 +69,20 @@ namespace sereno
             virtual bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const;
 
             virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const;
+
+            /** \brief  Has this dataset a mask?
+             * \return   true if yes, false otherwise */
+            bool hasMaskComputed() const {return m_mask != NULL;}
+
+            /** \brief  Get the mask to apply at indice "ind"
+             * \param ind the indice to look at
+             * \return  true if yes, false otherwise */
+            bool getMask(uint32_t ind) const
+            {
+                if(m_mask == NULL)
+                    return true;
+                return m_mask[ind/8]&(1 << (ind%8));
+            }
         private:
 
             /** \brief  Compute the multi-dimensional "gradient magnitude". Call it AFTER loading the data
@@ -86,6 +100,7 @@ namespace sereno
             std::vector<const VTKFieldValue*> m_ptFieldValues;     /*!< The point field values*/
             std::vector<const VTKFieldValue*> m_cellFieldValues;   /*!< The cell  field values*/
             std::shared_ptr<VTKParser>        m_parser;            /*!< The VTK parser*/
+            uint8_t*                          m_mask = NULL;       /*!< The mask values to apply. Here, 1 bit == 1 value*/
             std::thread                       m_readThread;        /*!< The reading thread*/
             bool                              m_readThreadRunning = false; /*!< Is the reading thread running?*/
     };
