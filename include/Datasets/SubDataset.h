@@ -115,20 +115,20 @@ namespace sereno
 
             /* \brief Get the snapshot pixels ARGB8888. 
              * \return A pointer to the snapshot structure. */
-            Snapshot* getSnapshot() const {return m_snapshot.get();}
+            std::shared_ptr<const Snapshot> getSnapshot() const {return m_snapshot;}
 #endif
 
             /* \brief  Get the transfer function bound to this subdataset
              * \return   The transfer function*/
-            TF*       getTransferFunction() {return m_tf;}
+            std::shared_ptr<TF> getTransferFunction() {return m_tf;}
 
             /* \brief  Get the transfer function bound to this subdataset
              * \return   The transfer function*/
-            const TF* getTransferFunction() const {return m_tf;}
+            std::shared_ptr<const TF> getTransferFunction() const {return m_tf;}
 
             /* \brief  Set the transfer function to use
              * \param tf the transfer function to use */
-            void setTransferFunction(TF* tf) {m_tf = tf;}
+            void setTransferFunction(std::shared_ptr<TF> tf) {m_tf = tf;}
 
             uint32_t getID() const {return m_id;}
         protected:
@@ -138,7 +138,7 @@ namespace sereno
             glm::vec3   m_scale    = glm::vec3(1.0, 1.0, 1.0); /*!< The 3D scaling*/
             Dataset*    m_parent   = NULL;                     /*!< The parent dataset*/
             std::string m_name;                                /*!< The SubDataset name*/
-            TF*         m_tf       = NULL;                     /*!< The transfer function in application*/
+            std::shared_ptr<TF> m_tf       = NULL;                     /*!< The transfer function in application*/
             uint32_t    m_id       = 1;                        /*!< The SubDataset ID*/
             std::list<std::shared_ptr<Annotation>> m_annotations; /*!< The SubDataset Annotation*/
 
