@@ -1,11 +1,11 @@
-#include "Datasets/BinaryDataset.h"
+#include "Datasets/VectorFieldDataset.h"
 #include "sciVisUtils.h"
 
 using namespace serenoSciVis;
 
 namespace sereno
 {
-    BinaryDataset::BinaryDataset(FILE* file, const std::string& name) : Dataset()
+    VectorFieldDataset::VectorFieldDataset(FILE* file, const std::string& name) : Dataset()
     {
 #define BUFFER_SIZE 3*sizeof(float)*270
         uint8_t buffer[BUFFER_SIZE];
@@ -60,12 +60,12 @@ namespace sereno
 #undef BUFFER_SIZE
     }
 
-    BinaryDataset::BinaryDataset(const BinaryDataset& copy) : Dataset(copy)
+    VectorFieldDataset::VectorFieldDataset(const VectorFieldDataset& copy) : Dataset(copy)
     {
         *this = copy;
     }
 
-    BinaryDataset::BinaryDataset(BinaryDataset&& mvt) : Dataset(mvt)
+    VectorFieldDataset::VectorFieldDataset(VectorFieldDataset&& mvt) : Dataset(mvt)
     {
         for(uint8_t i = 0; i < 3; i++)
             m_size[i] = mvt.m_size[i];
@@ -73,7 +73,7 @@ namespace sereno
         mvt.m_velocity = NULL;
     }
 
-    BinaryDataset& BinaryDataset::operator=(const BinaryDataset& copy)
+    VectorFieldDataset& VectorFieldDataset::operator=(const VectorFieldDataset& copy)
     {
         if(this == &copy)
             return *this;
@@ -86,13 +86,13 @@ namespace sereno
         return *this;
     }
 
-    BinaryDataset::~BinaryDataset()
+    VectorFieldDataset::~VectorFieldDataset()
     {
         if(m_velocity)
             free(m_velocity);
     }
 
-    BinaryDataset* BinaryDataset::readFromFilePath(const std::string& path)
+    VectorFieldDataset* VectorFieldDataset::readFromFilePath(const std::string& path)
     {
         //Open and check the file
         FILE* file = fopen(path.c_str(), "r");
@@ -103,7 +103,7 @@ namespace sereno
         const size_t lastSlashIdx = filename.find_last_of("\\/");
         if(std::string::npos != lastSlashIdx)
             filename.erase(0, lastSlashIdx + 1);
-        BinaryDataset* data = new BinaryDataset(file, filename);
+        VectorFieldDataset* data = new VectorFieldDataset(file, filename);
 
         //Check if the data is valid or not
         if(!data->getSubDataset(0)->isValid())
@@ -116,7 +116,7 @@ namespace sereno
         return data;
     }
 
-    Quaternionf BinaryDataset::getRotationQuaternion(uint32_t x, uint32_t y, uint32_t z) const
+    Quaternionf VectorFieldDataset::getRotationQuaternion(uint32_t x, uint32_t y, uint32_t z) const
     {
         uint32_t ind = x + m_size[0]*y + m_size[0]*m_size[1]*z;
         float vel[3] = {m_velocity[3*ind], m_velocity[3*ind+1], m_velocity[3*ind+2]};

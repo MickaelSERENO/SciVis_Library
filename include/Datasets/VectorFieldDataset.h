@@ -1,5 +1,5 @@
-#ifndef  BINARYDATASET_INC
-#define  BINARYDATASET_INC
+#ifndef  VECTORFIELDDATASET_INC
+#define  VECTORFIELDDATASET_INC
 
 #include <string>
 #include <iostream>
@@ -14,34 +14,34 @@
 namespace sereno
 {
     /*  \brief Class representing the fluid datasets */
-    class BinaryDataset : public Dataset
+    class VectorFieldDataset : public Dataset
     {
         public:
             /* \brief Constructor. Read the file defined by dataPath 
              * \param file the file to read
-             * \param name the BinaryDataset name*/
-            BinaryDataset(FILE* file, const std::string& name);
+             * \param name the VectorFieldDataset name*/
+            VectorFieldDataset(FILE* file, const std::string& name);
 
             /* \brief Copy constructor
-             * \param copy the BinaryDataset to copy */
-            BinaryDataset(const BinaryDataset& copy);
+             * \param copy the VectorFieldDataset to copy */
+            VectorFieldDataset(const VectorFieldDataset& copy);
 
             /* \brief movement constructor
              * \param mvt the variable to move */
-            BinaryDataset(BinaryDataset&& mvt);
+            VectorFieldDataset(VectorFieldDataset&& mvt);
 
             /* \brief operator=
-             * \param copy the BinaryDataset to copy */
-            BinaryDataset& operator=(const BinaryDataset& copy);
+             * \param copy the VectorFieldDataset to copy */
+            VectorFieldDataset& operator=(const VectorFieldDataset& copy);
 
             /* \brief Destructor. */
-            ~BinaryDataset();
+            ~VectorFieldDataset();
 
-            /* \brief Create a BinaryDataset from a filepath.
+            /* \brief Create a VectorFieldDataset from a filepath.
              * \param path the file path to read at
-             * \param the created BinaryDataset, null if the file is not defined 
-             * \return the BinaryDataset. Destroy it using delete operator*/
-            static BinaryDataset* readFromFilePath(const std::string& path);
+             * \param the created VectorFieldDataset, null if the file is not defined 
+             * \return the VectorFieldDataset. Destroy it using delete operator*/
+            static VectorFieldDataset* readFromFilePath(const std::string& path);
 
             /* \brief Get the velocity array. Size : getGridSize
              * \return the velocity array packed in (x, y, z) like : 
