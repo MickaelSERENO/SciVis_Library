@@ -27,15 +27,11 @@ namespace sereno
 
             /* \brief  Get the point positions 3D positions.
              * \return  If the dataset is loaded (see isLoaded()), returns a float array sized 3*getNbPoints(). Each tuple of 3 component represent a point of position (x, y, z). Else, return NULL */
-            float const* getPointPositions();
-
-            /* \brief  Get the point data. It corresponds to the first point field ID loaded (i.e., getCloudPointDescs()[0])
-             * \return  If the dataset is loaded (see isLoaded()), returns a float array sized getNbPoints(). Each value represent the only point data. Else, return NULL*/
-            float const* getPointData();
+            float const* getPointPositions() {return m_positions;}
 
             /* \brief Get the number of points loaded 
              * \return  The number of points loaded */
-            uint32_t getNbPoints();
+            uint32_t getNbPoints() {return m_nbPoints;}
         private:
             float*      m_positions = NULL; /*!< The 3D point positions (x1, y1, z1; x2, y2, z2; ...)*/
             uint32_t    m_nbPoints  = 0;    /*!< The number of pints loaded*/
