@@ -20,11 +20,58 @@ using namespace serenoSciVis;
 
 namespace sereno
 {
+    /** \brief  Utilitary function permitting to read the number of points of a file
+     * \param file the file to read. Its current cursor position is saved and restored 
+     * \param succeed a reference set at true if the function succeed its read, at false otherwise
+     * \return   the number of points the file contain. Set at 0 if an error occured (see 'succeed')
+     */
+    float _readNbPointsMetaData(FILE* file, bool& succeed)
+    {
+        size_t curPos = 0;
+        succeed = false;
+        float nbPoints = 0;
+        uint8_t buffer[4];
+        if(file != NULL)
+        {
+            curPos = ftell(file);
+            //Determine the file size
+            fseek(file, 0, SEEK_END);
+            uint32_t fileSize = ftell(file);
+            if(fileSize < 4 || fileSize%4 != 0)
+            {
+                ERROR << "The file has an incorrect format (wrong size). Abort\n";
+                goto error;
+            }
+            fseek(file, 0, SEEK_SET);
+
+            //Read the number of points
+            fread(buffer, sizeof(uint8_t), sizeof(uint32_t), file);
+            nbPoints = uint8ToUint32(buffer);
+            if(fileSize/4 != nbPoints)
+            {
+                ERROR << "The file should contain " << nbPoints << " data point. Contain actually " << fileSize/4 << " data point. Abort\n";
+                goto error;
+            }
+        }
+
+        succeed = true;
+error:
+        if(file)
+            fseek(file, curPos, SEEK_SET);
+        return nbPoints;
+    }
+
     CloudPointDataset::CloudPointDataset(const std::string& path) : m_filePath(path)
     {
         m_pointFieldDescs.resize(1);
         m_pointFieldDescs[0].id = 0;
         m_pointFieldDescs[0].minVal = m_pointFieldDescs[0].maxVal = 0.0f;
+
+        //Read meta data
+        FILE* file = fopen(m_filePath.c_str(), "r");
+        bool succeed;
+        m_nbPoints = _readNbPointsMetaData(file, succeed);
+        fclose(file);
     }
 
     CloudPointDataset::~CloudPointDataset()
@@ -37,12 +84,18 @@ namespace sereno
 
     void CloudPointDataset::loadValues(LoadCallback clbk, void* userData)
     {
+        if(m_nbPoints == 0)
+        {
+            WARNING << "No points to read about... Does the file exist?\n";
+            clbk(this, 0, userData);
+        }
 #define _BUFFER_SIZE 4096
         if(m_readThreadRunning == false)
         {
             m_readThreadRunning = true;
             m_readThread = std::thread([this, clbk, userData]()
             {
+                //Normally, with the constructor, this should always exist. But well...
                 FILE* file = fopen(m_filePath.c_str(), "r");
                 if(file != NULL)
                 {
@@ -51,25 +104,6 @@ namespace sereno
                     float minVal = std::numeric_limits<float>::max();
                     float maxVal = -minVal;
                     uint32_t i = 0;
-
-                    //Determine the file size
-                    fseek(file, 0, SEEK_END);
-                    uint32_t fileSize = ftell(file);
-                    if(fileSize < 4 || fileSize%4 != 0)
-                    {
-                        ERROR << "The file " << m_filePath << " has an incorrect format (wrong size). Abort\n";
-                        goto error;
-                    }
-                    fseek(file, 0, SEEK_SET);
-
-                    //Read the number of points
-                    fread(buffer, sizeof(uint8_t), sizeof(uint32_t), file);
-                    m_nbPoints = uint8ToUint32(buffer);
-                    if(fileSize/4 != m_nbPoints)
-                    {
-                        ERROR << "The file " << m_filePath << " should contain " << m_nbPoints << " data point. Contain actually " << fileSize/4 << " data point. Abort\n";
-                        goto error;
-                    }
 
                     m_positions = (float*)malloc(3*sizeof(float)*m_nbPoints);
                     data        = (float*)malloc(sizeof(float)*m_nbPoints);
@@ -114,16 +148,6 @@ namespace sereno
                     m_pointFieldDescs[0].values.reset(data);
 
                     fclose(file);
-                    goto endError;
-error:
-                    if(data != NULL)
-                        free(data);
-
-                    m_nbPoints = 0;
-                    fclose(file);
-                    clbk(this, 0, userData);
-                    return;                    
-endError:
                     clbk(this, 1, userData);
                 }
                 else
@@ -143,7 +167,7 @@ endError:
         //Check property
         if(ptFieldXID != 0)
         {
-            std::cerr << "Point Field X could not be found. Expected value: 0" << std::endl;
+            ERROR << "Point Field X could not be found. Expected value: 0" << std::endl;
             return false;
         }
 

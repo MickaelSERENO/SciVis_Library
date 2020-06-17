@@ -4,7 +4,8 @@ mkdir android_arm_build;
 mkdir android_x86_build;
 mkdir linux_x64_build;
 
-ANDROID_NDK=$HOME/Android/Sdk/ndk/21.0.6113669
+#ANDROID_NDK=$HOME/Android/Sdk/ndk/21.0.6113669
+ANDROID_NDK=/opt/android-ndk/
 
 #Android ARM
 cd android_arm_build
