@@ -65,7 +65,7 @@ namespace sereno
                     //Read the number of points
                     fread(buffer, sizeof(uint8_t), sizeof(uint32_t), file);
                     m_nbPoints = uint8ToUint32(buffer);
-                    if(fileSize/4 != m_nbPoints)
+                    if((fileSize-4)/(4*sizeof(float)) != m_nbPoints) //escape the meta data (-4)
                     {
                         ERROR << "The file " << m_filePath << " should contain " << m_nbPoints << " data point. Contain actually " << fileSize/4 << " data point. Abort\n";
                         goto error;
