@@ -63,15 +63,20 @@ error:
 
     CloudPointDataset::CloudPointDataset(const std::string& path) : m_filePath(path)
     {
-        m_pointFieldDescs.resize(1);
-        m_pointFieldDescs[0].id = 0;
-        m_pointFieldDescs[0].minVal = m_pointFieldDescs[0].maxVal = 0.0f;
-
         //Read meta data
         FILE* file = fopen(m_filePath.c_str(), "r");
         bool succeed;
         m_nbPoints = _readNbPointsMetaData(file, succeed);
         fclose(file);
+
+        m_pointFieldDescs.resize(1);
+        m_pointFieldDescs[0].id = 0;
+        m_pointFieldDescs[0].minVal   = m_pointFieldDescs[0].maxVal = 0.0f;
+        m_pointFieldDescs[0].format   = VTK_FLOAT;
+        m_pointFieldDescs[0].nbTuples = m_nbPoints;
+        m_pointFieldDescs[0].nbValuePerTuple = 1;
+        m_pointFieldDescs[0].name = "data";
+
     }
 
     CloudPointDataset::~CloudPointDataset()
