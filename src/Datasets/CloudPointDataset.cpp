@@ -99,53 +99,53 @@ error:
                 FILE* file = fopen(m_filePath.c_str(), "r");
                 if(file != NULL)
                 {
-                    uint8_t buffer[512];
+                    fseek(file, 4, SEEK_SET); //Skip metadata
+
+                    uint8_t buffer[_BUFFER_SIZE];
                     float* data = NULL;
                     float minVal = std::numeric_limits<float>::max();
                     float maxVal = -minVal;
-                    uint32_t i = 0;
+                    int32_t i = 0;
 
                     m_positions = (float*)malloc(3*sizeof(float)*m_nbPoints);
                     data        = (float*)malloc(sizeof(float)*m_nbPoints);
 
                     //Read all points
                     i = m_nbPoints-1;
-                    while(i > 0)
+                    while(i >= 0)
                     {
                         //Use as much as possible the whole buffer to avoid "small read chunk"
-                        uint32_t nbPointInRead = MIN(i, sizeof(buffer)/(3*sizeof(float)));
-                        fread(buffer, sizeof(float), 3*nbPointInRead, file);
+                        uint32_t nbPointInRead = MIN(i+1, (int32_t)(_BUFFER_SIZE/(3*sizeof(float))));
+                        fread(buffer, sizeof(uint8_t), 3*sizeof(float)*nbPointInRead, file);
 
                         //Save the data position
-                        for(uint32_t j = 0; j < nbPointInRead; j++)
-                        {
+                        for(uint32_t j = 0; j < nbPointInRead; j++, i--)
                             for(uint32_t k = 0; k < 3; k++)
-                                m_positions[3*(m_nbPoints-1-i) + k] = uint8ToFloat(buffer+sizeof(float)*3*j+k);
-                            i--;
-                        }
+                                m_positions[3*(m_nbPoints-1-i) + k] = uint8ToFloat(buffer+sizeof(float)*(3*j+k));
                     }
 
                     //Do the same for point data (float scalar)
                     i = m_nbPoints-1;
-                    while(i > 0)
+                    while(i >= 0)
                     {
                         //Use as much as possible the whole buffer to avoid "small read chunk"
-                        uint32_t nbPointInRead = MIN(i, sizeof(buffer)/(sizeof(float)));
-                        fread(buffer, sizeof(float), nbPointInRead, file);
+                        uint32_t nbPointInRead = MIN(i+1, (int32_t)(_BUFFER_SIZE/(sizeof(float))));
+                        fread(buffer, sizeof(uint8_t), nbPointInRead*sizeof(float), file);
 
                         //Save the data position
-                        for(uint32_t j = 0; j < nbPointInRead; j++)
+                        for(uint32_t j = 0; j < nbPointInRead; j++, i--)
                         {
                             data[m_nbPoints-1-i] = uint8ToFloat(buffer+sizeof(float)*j);
                             minVal = MIN(minVal, data[m_nbPoints-1-i]);
                             maxVal = MAX(maxVal, data[m_nbPoints-1-i]);
-                            i--;
                         }
                     }
 
                     m_pointFieldDescs[0].minVal = minVal;
                     m_pointFieldDescs[0].maxVal = maxVal;
                     m_pointFieldDescs[0].values.reset(data);
+
+                    m_valuesLoaded = true;
 
                     fclose(file);
                     clbk(this, 1, userData);
