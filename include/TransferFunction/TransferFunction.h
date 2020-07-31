@@ -53,7 +53,7 @@ namespace sereno
                 float mag = 0;
                 for(uint32_t i = 0; i < m_dim; i++)
                     mag += ind[i]*ind[i];
-                mag = sqrt(mag/m_dim);
+                mag = sqrt(mag)/m_dim;
                 Color c = SciVis_computeColor(m_mode, mag);
                 for(int i = 0; i < 3; i++)
                     colOut[i] = std::min(255.0f, std::max(0.0f, 255.0f*c[i]));
