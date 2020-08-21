@@ -79,6 +79,10 @@ namespace sereno
                 std::cerr << "Histograms cannot be computed for this type of Dataset because it contains only one fieldID" << std::endl;
                 return false;
             }
+
+        protected:
+            virtual DatasetGradient* computeGradient(const std::vector<uint32_t>& indices) {return NULL;}
+
         private:
             uint32_t m_size[3];           /*!< The 3D size of the grid*/
             float*   m_velocity = NULL;   /*!< The velocity array of all the grid cell. Access via m_velocity[i + j*width + k*width*height] */ 

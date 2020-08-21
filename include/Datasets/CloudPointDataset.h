@@ -32,6 +32,9 @@ namespace sereno
             /* \brief Get the number of points loaded 
              * \return  The number of points loaded */
             uint32_t getNbPoints() {return m_nbPoints;}
+        protected:
+            virtual DatasetGradient* computeGradient(const std::vector<uint32_t>& indices) {return NULL;}
+
         private:
             float*      m_positions = NULL; /*!< The 3D point positions (x1, y1, z1; x2, y2, z2; ...)*/
             uint32_t    m_nbPoints  = 0;    /*!< The number of pints loaded*/

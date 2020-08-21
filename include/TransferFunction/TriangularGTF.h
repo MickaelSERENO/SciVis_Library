@@ -4,7 +4,6 @@
 #include "TransferFunction/TransferFunction.h"
 #include <algorithm>
 
-
 namespace sereno
 {
     class TriangularGTF : public TF
@@ -137,6 +136,7 @@ namespace sereno
              */
             void setAlphaMax(float alphaMax) {m_alphaMax = alphaMax;}
 
+            virtual bool hasGradient() const {return true;}
         private:
             float* m_scale    = NULL; /*!< The scaling factor*/
             float* m_center   = NULL; /*!< The center*/

@@ -1,5 +1,6 @@
 #include "Datasets/Dataset.h"
 #include <utility>
+#include <algorithm>
 
 namespace sereno
 {
@@ -33,5 +34,24 @@ namespace sereno
             if(m_pointFieldDescs[i].id == pID)
                 return i;
         return -1;
+    }
+
+
+    DatasetGradient* Dataset::getOrComputeGradient(const std::vector<uint32_t>& indices)
+    {
+        //Search for an existing computed gradient
+        std::vector<uint32_t> idsCpy = indices;
+        std::sort(idsCpy.begin(), idsCpy.end());
+        for(auto& it : m_grads)
+        {
+            if(idsCpy == indices)
+                return it;
+        }
+
+        //Compute the gradient, store it, and return it
+        DatasetGradient* grad = computeGradient(idsCpy);
+        if(grad)
+            m_grads.push_back(grad);
+        return grad;
     }
 }

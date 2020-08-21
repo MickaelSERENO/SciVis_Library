@@ -8,6 +8,14 @@
 
 namespace sereno
 {
+    /** \brief Structure containing the gradient information for a given dataset */
+    struct DatasetGradient
+    {
+        std::vector<uint32_t>                indices; /*!< List of the value IDs being used for this gradient computation*/
+        std::unique_ptr<float, _FreeDeleter> grads;   /*!< The gradient values*/
+        float                                maxVal;  /*!< The max gradient values*/
+    };
+
     class Dataset;
 
     /* \brief  Callback function to call
@@ -136,20 +144,6 @@ namespace sereno
                 return m_pointFieldDescs;
             }
 
-            /** \brief  Get the gradient data value.
-             * \return  The gradient data pointer. The size of the array depends on the dataset.  */
-            const float* getGradient() const
-            {
-                return m_grads.get();
-            }
-
-            /** \brief  Get the maximum computed gradient value
-             * \return    the maximum computer gradient value */
-            float getMaxGradientValue() const
-            {
-                return m_maxGrad;
-            }
-
             /* \brief  Load the values of the Dataset in a separated thread.
              * \param clbk the callback function to call when the loading is finished
              * \param data extra data to send to the callback function*/
@@ -186,7 +180,18 @@ namespace sereno
              *
              * \return true on success, false on failure. If failed, output will not be touched */
             virtual bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const = 0;
+
+            /** \brief Get the gradient of the field based on the point field indices needed. If the gradient for these particular values are not yet computed, the function computes and stores the gradient for these particular field indices 
+             * \param indices the indices to look at
+             * \return  NULL if an error occured, the DatasetGradient information otherwise */
+            DatasetGradient* getOrComputeGradient(const std::vector<uint32_t>& indices);
         protected:
+            /** \brief  Computes and stores the gradient of the field considering a subset of the field parameters
+             * \param indices the transfer
+             * \return   
+             */
+            virtual DatasetGradient* computeGradient(const std::vector<uint32_t>& indices) = 0;
+
             /** \brief  Set the subdataset validity using friendship
              * \param dataset the subdataset to modify
              * \param isValid the new validity*/
@@ -195,9 +200,9 @@ namespace sereno
                 dataset->m_isValid = isValid;
             }
 
-            std::vector<SubDataset*>    m_subDatasets;     /*!< Array of sub datasets*/
-            std::vector<PointFieldDesc> m_pointFieldDescs; /*!< Array of point field data*/
-            std::unique_ptr<float, _FreeDeleter> m_grads;  /*!< The gradient array*/
+            std::vector<SubDataset*>     m_subDatasets;     /*!< Array of sub datasets*/
+            std::vector<PointFieldDesc>  m_pointFieldDescs; /*!< Array of point field data*/
+            std::vector<DatasetGradient*> m_grads;          /*!< The gradient array*/
             float    m_maxGrad = 0; /*!< The maximum gradient computed*/
             uint32_t m_curSDID = 0; /*!< The current SubDataset ID*/
             bool     m_valuesLoaded = false; /*!< Are the values parsed?*/

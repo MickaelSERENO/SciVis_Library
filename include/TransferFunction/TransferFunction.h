@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "SciVisColor.h"
 #include <algorithm>
+#include <vector>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -20,7 +21,9 @@ namespace sereno
              * \param dim the dimension of the transfer function
              * \param mode the color mode*/
             TF(uint32_t dim, ColorMode mode) : m_dim(dim), m_mode(mode)
-            {}
+            {
+                m_enabled.resize(m_dim, true);
+            }
 
             TF(const TF& copy)
             {
@@ -70,7 +73,20 @@ namespace sereno
             /* \brief  Get the color mode of this transfer function
              * \param mode the new transfer function color mode */
             void setColorMode(ColorMode mode) {m_mode = mode;}
+
+            /* \brief  Is this Transfer function taking into account the gradient of the field?
+             * \return  true if this transfer function uses the gradient of the field as a dimension, false otherwise */
+            virtual bool hasGradient() const {return false;}
+
+            /** \brief  set the array of the enabled dimensions.
+             * \param ids the array of the enabled dimensions. ids[i] == dimensions[i].enabled (false if not enabled, true otherwise) */
+            virtual void setEnabledDimensions(const std::vector<bool>& ids) {m_enabled = ids;}
+
+            /** \brief  get the array of the enabled dimensions.
+             * \return the enabled dimensions. array[i] == dimensions[i].enabled.*/
+            const std::vector<bool>& getEnabledDimensions() const {return m_enabled;}
         protected:
+            std::vector<bool> m_enabled; /*!< m_enabled[ids] == true if enabled, false otherwise. Size: m_dim. */
             uint32_t  m_dim;  /*!< The transfer function dimension*/
             ColorMode m_mode; /*!< The color mode*/
     };

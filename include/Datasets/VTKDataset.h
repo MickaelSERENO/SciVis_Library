@@ -83,6 +83,10 @@ namespace sereno
                     return true;
                 return m_mask[ind/8]&(1 << (ind%8));
             }
+
+        protected:
+            virtual DatasetGradient* computeGradient(const std::vector<uint32_t>& indices);
+
         private:
 
             /** \brief  Compute the multi-dimensional "gradient magnitude". Call it AFTER loading the data
@@ -95,7 +99,7 @@ namespace sereno
              * See Joe Kniss, Gordon Kindlmann, and Charles Hansen. 2002. Multidimensional Transfer Functions for Interactive Volume Rendering. IEEE Transactions on Visualization and Computer Graphics 8, 3 (July 2002)
              *
              */
-            virtual void computeMultiDGradient();
+            void computeMultiDGradient();
 
             std::vector<const VTKFieldValue*> m_ptFieldValues;     /*!< The point field values*/
             std::vector<const VTKFieldValue*> m_cellFieldValues;   /*!< The cell  field values*/

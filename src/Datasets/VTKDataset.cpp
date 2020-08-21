@@ -143,7 +143,10 @@ namespace sereno
                     m_pointFieldDescs[i].values.reset(data);
                 }
 
-                computeMultiDGradient();
+                std::vector<uint32_t> fields;
+                fields.reserve(m_pointFieldDescs.size());
+
+                getOrComputeGradient(fields);
 
                 //Computation done, set the state to "loaded" and call the callback function
                 m_valuesLoaded = true;
@@ -154,7 +157,7 @@ namespace sereno
         }
     }
 
-    void VTKDataset::computeMultiDGradient()
+    DatasetGradient* VTKDataset::computeGradient(const std::vector<uint32_t>& indices)
     {
         const VTKStructuredPoints& ptsDesc = m_parser->getStructuredPointsDescriptor();
         float* grads = (float*)malloc(sizeof(float)*ptsDesc.size[0]*ptsDesc.size[1]*ptsDesc.size[2]);
@@ -163,14 +166,14 @@ namespace sereno
         /*--------------------------Compute gradient values---------------------------*/
         /*----------------------------------------------------------------------------*/
         float maxGrad=0;
-        if(m_pointFieldDescs.size() > 1)
+        if(indices.size() > 1)
         {
             //The Df matrice, see the doxygen
 #ifdef _OPENMP
             #pragma omp parallel reduction(max:maxGrad)
 #endif
             {
-                float* df = (float*)malloc(sizeof(float)*3*m_pointFieldDescs.size());
+                float* df = (float*)malloc(sizeof(float)*3*indices.size());
 
 #ifdef _OPENMP
                 #pragma omp for
@@ -186,11 +189,11 @@ namespace sereno
                                 grads[ind] = 0;
                                 continue;
                             }
-                            for(uint32_t l = 0; l < m_pointFieldDescs.size(); l++)
+                            for(uint32_t l = 0; l < indices.size(); l++)
                             {
-                                const PointFieldDesc& ptFieldValue = m_pointFieldDescs[l];
+                                const PointFieldDesc& ptFieldValue = m_pointFieldDescs[indices[l]];
                                 int formatSize = VTKValueFormatInt(ptFieldValue.format);
-                                uint8_t* vals = (uint8_t*)m_pointFieldDescs[l].values.get();
+                                uint8_t* vals = (uint8_t*)ptFieldValue.values.get();
 
                                 if(ptFieldValue.nbValuePerTuple == 1)
                                 {
@@ -233,7 +236,7 @@ namespace sereno
                             for(uint32_t l = 0; l < 9; l++)
                                 g[l] = 0.0f;
                             
-                            for(uint32_t n = 0; n < m_pointFieldDescs.size(); n++)
+                            for(uint32_t n = 0; n < indices.size(); n++)
                                 for(uint32_t l = 0; l < 3; l++)
                                     for(uint32_t m = 0; m < 3; m++)
                                         g[3*l+m] += df[3*n+l]*df[3*n+m];
@@ -251,11 +254,11 @@ namespace sereno
                 free(df);
             }
         }
-        else if(m_ptFieldValues.size() == 1)
+        else if(indices.size() == 1)
         {
-            const PointFieldDesc& ptFieldValue = m_pointFieldDescs[0];
+            const PointFieldDesc& ptFieldValue = m_pointFieldDescs[indices[0]];
             int formatSize = VTKValueFormatInt(ptFieldValue.format);
-            uint8_t* vals = (uint8_t*)m_pointFieldDescs[0].values.get();
+            uint8_t* vals = (uint8_t*)ptFieldValue.values.get();
 
             if(ptFieldValue.nbValuePerTuple == 1)
             {
@@ -377,8 +380,12 @@ namespace sereno
                 }
         }
 
-        m_maxGrad = maxGrad;
-        m_grads.reset(grads);
+        DatasetGradient* gradientData = new DatasetGradient();
+        gradientData->maxVal = maxGrad;
+        gradientData->grads.reset(grads);
+        gradientData->indices = indices;
+
+        return gradientData;
     }
 
 
