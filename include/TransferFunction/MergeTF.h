@@ -16,7 +16,7 @@ namespace sereno
              * \param tf1 the first transfer function (at t==0.0f)
              * \param tf2 the second transfer function (at t==1.0f)
              * \param t the linear interpolation parameter. Must be between 0.0f and 1.0f*/
-            MergeTF(std::shared_ptr<TF> tf1, std::shared_ptr<TF> tf2, float t=0.0f) : TF(std::max(tf1->getDimension(), tf2->getDimension(), tf1->getColorMode())),  m_tf1(tf1), m_tf2(tf2), m_t(t)
+            MergeTF(std::shared_ptr<TF> tf1, std::shared_ptr<TF> tf2, float t=0.0f) : TF(std::max(tf1->getDimension(), tf2->getDimension()), tf1->getColorMode()),  m_tf1(tf1), m_tf2(tf2), m_t(t)
             {
                 if(m_tf1->getDimension() <= m_tf2->getDimension() &&
                    m_tf1->hasGradient() && !m_tf2->hasGradient())
@@ -97,7 +97,7 @@ namespace sereno
                     m_tf2->computeColor(ind, tf2Val);
 
                 for(uint8_t i = 0; i < 3; i++)
-                    outCol[i] = (uint8_t)((1.0f-m_t)*tf1Val[i] + m_t*tf2Val[i]);
+                    colOut[i] = (uint8_t)((1.0f-m_t)*tf1Val[i] + m_t*tf2Val[i]);
             }
 
             virtual bool hasGradient() const {return m_tf1->hasGradient() || m_tf2->hasGradient();}
@@ -120,7 +120,7 @@ namespace sereno
             std::shared_ptr<TF> m_tf1 = NULL; /*!< The first transfer function to interpolate at m_t==0.0f*/
             std::shared_ptr<TF> m_tf2 = NULL; /*!< The second transfer function to interpolate at m_t==1.0f*/
             float               m_t   = 0.0f; /*!< The linear interpolation parameter*/
-    }
+    };
 }
 
 #endif

@@ -22,7 +22,7 @@ namespace sereno
         {
             case RAINBOW:
             {
-                HSVColor hsvColor(260.0*t, 1.0f, 1.0f, 1.0f);
+                HSVColor hsvColor(260.0f*t, 1.0f, 1.0f, 1.0f);
                 c = hsvColor.toRGB();
                 break;
             }
