@@ -19,6 +19,7 @@ namespace sereno
         if(this == &copy)
             return *this;
         m_subDatasets = std::move(copy.m_subDatasets);
+        m_grads       = std::move(copy.m_grads);
         return *this;
     }
 
@@ -26,6 +27,8 @@ namespace sereno
     {
         while(m_subDatasets.size() != 0)
             removeSubDataset(m_subDatasets.back());
+        for(auto it : m_grads)
+            delete it;
     }
 
     uint32_t Dataset::getTFIndiceFromPointFieldID(uint32_t pID)
@@ -44,7 +47,7 @@ namespace sereno
         std::sort(idsCpy.begin(), idsCpy.end());
         for(auto& it : m_grads)
         {
-            if(idsCpy == indices)
+            if(idsCpy == it->indices)
                 return it;
         }
 
