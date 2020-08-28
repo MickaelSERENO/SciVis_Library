@@ -8,6 +8,7 @@ namespace sereno
         TF_NONE           = 0,
         TF_GTF            = 1,
         TF_TRIANGULAR_GTF = 2,
+        TF_MERGE             = 3,
     };
 }
 
