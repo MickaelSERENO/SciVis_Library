@@ -1,5 +1,6 @@
 #include "Datasets/SubDataset.h"
 #include "Datasets/Dataset.h"
+#include <cstring>
 
 namespace sereno
 {
@@ -9,6 +10,14 @@ namespace sereno
 #endif
     {
         m_parent = parent;
+
+        //Initialize the volumetric mask
+        if(parent)
+        {
+            size_t nbData = sizeof(uint8_t)*(parent->getNbSpatialData()+7)/8;
+            m_volumetricMask = (uint8_t*)malloc(nbData);
+            memset(m_volumetricMask, 0xff, nbData);
+        }
         setID(id);
     }
 
@@ -33,6 +42,13 @@ namespace sereno
 
             for(auto& it : sd.m_annotations)
                 m_annotations.push_back(std::shared_ptr<Annotation>(new Annotation(*it.get())));
+
+            if(m_parent)
+            {
+                size_t nbData = sizeof(uint8_t)*(m_parent->getNbSpatialData()+7)/8;
+                m_volumetricMask = (uint8_t*)malloc(nbData);
+                memcpy(m_volumetricMask, sd.m_volumetricMask, nbData);
+            }
         }
 
         return *this;
@@ -65,5 +81,24 @@ namespace sereno
     std::list<std::shared_ptr<Annotation>>::const_iterator SubDataset::removeAnnotation(std::list<std::shared_ptr<Annotation>>::const_iterator it)
     {
         return m_annotations.erase(it);
+    }
+
+    bool SubDataset::getVolumetricMaskAt(uint32_t x) const
+    {
+        return m_volumetricMask[x/8] & (1 << (x%8));
+    }
+
+    void SubDataset::setVolumetricMaskAt(uint32_t x, bool b)
+    {
+        if(b)
+            m_volumetricMask[x/8] = m_volumetricMask[x/8] | (1 << (x%8));
+        else
+            m_volumetricMask[x/8] = m_volumetricMask[x/8] & (~(1 << (x%8)));
+
+    }
+
+    void SubDataset::resetVolumetricMask()
+    {
+        memset(m_volumetricMask, 0x00, m_parent->getNbSpatialData());
     }
 }

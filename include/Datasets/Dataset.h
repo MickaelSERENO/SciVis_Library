@@ -153,6 +153,14 @@ namespace sereno
              * \return   true if yes, false otherwise */
             bool areValuesLoaded() const {return m_valuesLoaded;}
 
+            /** \brief  Get the number of spatial data value contained inside 
+             * \return  The number of spatial data value 
+             */
+            virtual uint32_t getNbSpatialData() const
+            {
+                return (m_pointFieldDescs.size() > 0) ? m_pointFieldDescs[0].nbTuples : 0;
+            }
+
             /**
              * \brief  Get the Transfer Function indice to use based on the pID
              * \param pID the pID to evaluate
@@ -203,7 +211,6 @@ namespace sereno
             std::vector<SubDataset*>     m_subDatasets;     /*!< Array of sub datasets*/
             std::vector<PointFieldDesc>  m_pointFieldDescs; /*!< Array of point field data*/
             std::vector<DatasetGradient*> m_grads;          /*!< The gradient array*/
-            float    m_maxGrad = 0; /*!< The maximum gradient computed*/
             uint32_t m_curSDID = 0; /*!< The current SubDataset ID*/
             bool     m_valuesLoaded = false; /*!< Are the values parsed?*/
     };

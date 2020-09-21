@@ -130,6 +130,25 @@ namespace sereno
              * \param tf the transfer function to use */
             void setTransferFunction(std::shared_ptr<TF> tf) {m_tf = tf;}
 
+            /** \brief  Get the volumetric mask. We are using bit mask and not boolean objects. Size: (getParent()->getNbSpatialData()+7)/8
+             * \return   the volumetric mask.  */
+            const uint8_t* getVolumetricMask() const {return m_volumetricMask;}
+
+            /** \brief Set the volumetric mask cell at x
+             * \param x the spatial data indice to modify. The number of spatial value is getParent()->getNbSpatialData()
+             * \param b the boolean status to apply*/
+            void setVolumetricMaskAt(uint32_t x, bool b);
+
+            /** \brief Get the volumetric mask cell at x
+             * \param x the spatial data indice to get. The number of spatial value is getParent()->getNbSpatialData()
+             * \return the mask value. true for activated, false for disactivated*/
+            bool getVolumetricMaskAt(uint32_t x) const;
+
+            /** \brief  Reset to false the volumetric mask */
+            void resetVolumetricMask();
+
+            /** \brief  Get the ID of this SUbDataset
+             * \return   the subdataset ID */
             uint32_t getID() const {return m_id;}
         protected:
             bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
@@ -145,6 +164,7 @@ namespace sereno
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
 #endif
+            uint8_t* m_volumetricMask = NULL;
         private:
             /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
              * \param id the new ID */
