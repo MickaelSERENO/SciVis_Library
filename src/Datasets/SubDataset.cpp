@@ -83,22 +83,19 @@ namespace sereno
         return m_annotations.erase(it);
     }
 
-    bool SubDataset::getVolumetricMaskAt(uint32_t x) const
+    void SubDataset::resetVolumetricMask(bool t, bool isReset)
     {
-        return m_volumetricMask[x/8] & (1 << (x%8));
+        memset(m_volumetricMask, (t ? 0xff : 0x00), m_parent->getNbSpatialData());
+        m_noSelection = isReset;
     }
 
-    void SubDataset::setVolumetricMaskAt(uint32_t x, bool b)
+    glm::mat4 SubDataset::getModelWorldMatrix() const
     {
-        if(b)
-            m_volumetricMask[x/8] = m_volumetricMask[x/8] | (1 << (x%8));
-        else
-            m_volumetricMask[x/8] = m_volumetricMask[x/8] & (~(1 << (x%8)));
+        glm::mat4 posMat(1.0f);
+        posMat = glm::translate(posMat, getPosition());
+        posMat = posMat * getGlobalRotate().getMatrix();
+        posMat = glm::scale(posMat, getScale());
 
-    }
-
-    void SubDataset::resetVolumetricMask()
-    {
-        memset(m_volumetricMask, 0x00, m_parent->getNbSpatialData());
+        return posMat;
     }
 }

@@ -46,6 +46,9 @@ namespace sereno
             desc->minVal = INT_MIN; //Those two values are computed in the load method
             desc->maxVal = INT_MIN;
         }
+        
+        m_minPos = glm::vec3(-0.5f, -0.5f, -0.5f);
+        m_maxPos = glm::vec3(0.5f, 0.5f, 0.5f);
     }
 
     VTKDataset::~VTKDataset()

@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <memory>
 #include <vector>
+#include <limits>
 
 
 #ifndef MIN
@@ -115,6 +116,9 @@ error:
                     m_positions = (float*)malloc(3*sizeof(float)*m_nbPoints);
                     data        = (float*)malloc(sizeof(float)*m_nbPoints);
 
+                    m_minPos.x = m_minPos.y = m_minPos.z = std::numeric_limits<float>::max();
+                    m_maxPos.x = m_maxPos.y = m_maxPos.z = std::numeric_limits<float>::min();
+
                     //Read all points
                     i = m_nbPoints-1;
                     while(i >= 0)
@@ -126,7 +130,14 @@ error:
                         //Save the data position
                         for(uint32_t j = 0; j < nbPointInRead; j++, i--)
                             for(uint32_t k = 0; k < 3; k++)
-                                m_positions[3*(m_nbPoints-1-i) + k] = uint8ToFloat(buffer+sizeof(float)*(3*j+k));
+                            {
+                                float pos = uint8ToFloat(buffer+sizeof(float)*(3*j+k));
+                                m_positions[3*(m_nbPoints-1-i) + k] = pos;
+                                if(m_minPos[k] > pos)
+                                    m_minPos[k] = pos;
+                                if(m_maxPos[k] < pos)
+                                    m_maxPos[k] = pos;
+                            }
                     }
 
                     //Do the same for point data (float scalar)

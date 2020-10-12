@@ -1,11 +1,16 @@
 #ifndef  SUBDATASET_INC
 #define  SUBDATASET_INC
 
+#ifndef GLM_FORCE_RADIANS
+#define GLM_FORCE_RADIANS
+#endif
+
 #include <limits>
 #include <stdint.h>
 #include <memory>
 #include <list>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp> 
 #include <string>
 #include "Quaternion.h"
 #include "TransferFunction/TransferFunction.h"
@@ -137,19 +142,38 @@ namespace sereno
             /** \brief Set the volumetric mask cell at x
              * \param x the spatial data indice to modify. The number of spatial value is getParent()->getNbSpatialData()
              * \param b the boolean status to apply*/
-            void setVolumetricMaskAt(uint32_t x, bool b);
+            void setVolumetricMaskAt(uint32_t x, bool b)
+            {
+                if(b)
+                    m_volumetricMask[x/8] = m_volumetricMask[x/8] | (1 << (x%8));
+                else
+                    m_volumetricMask[x/8] = m_volumetricMask[x/8] & (~(1 << (x%8)));
+            }
 
             /** \brief Get the volumetric mask cell at x
              * \param x the spatial data indice to get. The number of spatial value is getParent()->getNbSpatialData()
              * \return the mask value. true for activated, false for disactivated*/
-            bool getVolumetricMaskAt(uint32_t x) const;
+            bool getVolumetricMaskAt(uint32_t x) const
+            {
+                return m_volumetricMask[x/8] & (1 << (x%8));
+            }
 
-            /** \brief  Reset to false the volumetric mask */
-            void resetVolumetricMask();
+            /** \brief  Reset to false or true the volumetric mask 
+             * \param t the reset value (false or true)
+             * \param isReset should we consider that no volumetric selection has been performed?*/
+            void resetVolumetricMask(bool t, bool isReset=true);
+
+            /** \brief  If a volumetric selection performed?
+             * \return   true if no, false otherwise */
+            bool isVolumetricMaskReset() const {return m_noSelection;}
 
             /** \brief  Get the ID of this SUbDataset
              * \return   the subdataset ID */
             uint32_t getID() const {return m_id;}
+            
+            /** \brief  Get the model--world matrix
+             * \return  the glm::mat4 associated */
+            glm::mat4 getModelWorldMatrix() const;
         protected:
             bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
             Quaternionf m_rotation;                            /*!< The quaternion rotation*/
@@ -164,7 +188,8 @@ namespace sereno
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
 #endif
-            uint8_t* m_volumetricMask = NULL;
+            uint8_t* m_volumetricMask = NULL; /*!< The volumetric mask*/
+            bool     m_noSelection    = true; /*!< Did we start to apply a volumetric selection on this SubDataset?*/
         private:
             /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
              * \param id the new ID */

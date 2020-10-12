@@ -161,6 +161,20 @@ namespace sereno
                 return (m_pointFieldDescs.size() > 0) ? m_pointFieldDescs[0].nbTuples : 0;
             }
 
+            /** \brief  Get the minimum position (bounding box) of this dataset object in its local coordinate system
+             * \return    3D point corresponding to the minimum position of the dataset's bounding box */
+            glm::vec3 getMinPos() const
+            {
+                return m_minPos;
+            }
+
+            /** \brief  Get the maximum position (bounding box) of this dataset object in its local coordinate system
+             * \return    3D point corresponding to the maximum position of the dataset's bounding box */
+            glm::vec3 getMaxPos() const
+            {
+                return m_maxPos;
+            }
+
             /**
              * \brief  Get the Transfer Function indice to use based on the pID
              * \param pID the pID to evaluate
@@ -213,6 +227,9 @@ namespace sereno
             std::vector<DatasetGradient*> m_grads;          /*!< The gradient array*/
             uint32_t m_curSDID = 0; /*!< The current SubDataset ID*/
             bool     m_valuesLoaded = false; /*!< Are the values parsed?*/
+
+            glm::vec3 m_minPos; /*!< The minimum position of the bounding box*/
+            glm::vec3 m_maxPos; /*!< The maximum position of the bounding box*/
     };
 }
 
