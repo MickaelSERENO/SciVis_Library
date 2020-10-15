@@ -164,11 +164,14 @@ error:
                     m_valuesLoaded = true;
 
                     fclose(file);
-                    clbk(this, 1, userData);
+
+                    if(clbk)
+                        clbk(this, 1, userData);
                 }
                 else
                 {
-                    clbk(this, 0, userData);
+                    if(clbk)
+                        clbk(this, 0, userData);
                     return;
                 }
             });

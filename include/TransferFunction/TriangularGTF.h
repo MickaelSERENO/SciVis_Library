@@ -38,7 +38,7 @@ namespace sereno
                     m_scale  = (float*)malloc(sizeof(float)*m_dim);    
                     m_center = (float*)malloc(sizeof(float)*m_dim);    
 
-                    for(uint32_t i = 0; i < m_dim; i++)
+                    for(uint32_t i = 0; i < m_dim-1; i++)
                     {
                         m_scale[i]  = copy.m_scale[i];
                         m_center[i] = copy.m_center[i];

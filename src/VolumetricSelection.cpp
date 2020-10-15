@@ -8,6 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include "Datasets/CloudPointDataset.h"
+#include "Datasets/VTKDataset.h"
 
 #ifndef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -19,9 +20,50 @@
 
 namespace sereno
 {
-    bool rayTriangleIntersection(const glm::vec3& pos, const glm::vec3& rayDir, const glm::vec3* triangle, float* t = NULL)
+    /** \brief  Compute the intersection between a ray and a triangle
+     *
+     * \param rayOrigin the ray origin 3D position
+     * \param rayDir the ray 3D direction
+     * \param triangle array containing the triangle data. Minimal length: 3
+     * \param t[out] pointer for the t parameter to change when there is an intersection. 
+     * This is unchanged if the function could not find an intersection between the ray and the triangle. Intersection 3D point: pos + t*rayDir
+     *
+     * \return   true if there is an intersection, false otherwise */
+    static bool rayTriangleIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3* triangle, float* t = NULL)
     {
-        return false;
+        float _t = 0;
+
+        const float EPSILON = 0.0000001f;
+
+        glm::vec3 edge1 = triangle[1] - triangle[0];
+        glm::vec3 edge2 = triangle[2] - triangle[0];
+        glm::vec3 h = glm::cross(rayDir, edge2);
+        float a = glm::dot(edge1, h);
+        if (a > -EPSILON && a < EPSILON)
+            return false;    // This ray is parallel to this triangle.
+
+        float   f = 1.0f / a;
+        glm::vec3 s = rayOrigin - triangle[0];
+        float   u = f * glm::dot(s, h);
+
+        if (u < 0.0f || u > 1.0f)
+            return false;
+
+        glm::vec3 q = glm::cross(s, edge1);
+        float   v = f * glm::dot(rayDir, q);
+        if (v < 0.0f || u + v > 1.0f)
+            return false;
+
+        // At this stage we can compute t to find out where the intersection point is on the line.
+        _t = f * glm::dot(edge2, q);
+        if (_t > EPSILON) // ray intersection
+        {
+            if(t)
+                *t = _t;
+            return true;
+        }
+        else // This means that there is a line intersection but not a ray intersection.
+            return false;
     }
 
     /**
@@ -49,7 +91,7 @@ namespace sereno
         }
 
         if(sd->isVolumetricMaskReset())
-            sd->resetVolumetricMask(false, true);
+            sd->resetVolumetricMask(false, false);
         
         //First, transform every point using the provided matrix
         glm::vec3* points = new glm::vec3[mesh.points.size()];
@@ -71,8 +113,14 @@ namespace sereno
             glm::vec3 maxPos;
             for(int j = 0; j < 3; j++)
             {
-                minPos[j] = MIN(points[mesh.triangles[3*i+0]][j], MIN(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
-                maxPos[j] = MAX(points[mesh.triangles[3*i+0]][j], MAX(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
+                if(mesh.triangles[3*i] > mesh.points.size())
+                {
+                    std::cerr << "error in the mesh... exiting" << std::endl;
+                    return;
+                }
+
+                minPos[j] = MIN(points[mesh.triangles[3*i]][j], MIN(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
+                maxPos[j] = MAX(points[mesh.triangles[3*i]][j], MAX(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
 
                 //Set them as indices in our 3D restered space
                 minPos[j] = CUBE_SIZE[j] * ((minPos[j] - sd->getParent()->getMinPos()[j]) / (sd->getParent()->getMaxPos()[j] - sd->getParent()->getMinPos()[j]));
@@ -143,6 +191,8 @@ namespace sereno
                         //Do not check multiple times the same triangle
                         if (std::find(triangleIDAlready.begin(), triangleIDAlready.end(), triangleID) != triangleIDAlready.end())
                             continue;
+
+                        std::cout << "Intersection at " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
                         nbIntersection++;
                         triangleIDAlready.push_back(triangleID);
                     }
@@ -161,6 +211,11 @@ namespace sereno
                 rayDir.x *= -1.0f;
                 for(int j = particuleX; j >= 0; j--)
                     rayCastAction(j);
+            }
+
+            if(nbIntersection%2)
+            {
+                std::cout << "Youpi! at " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
             }
 
             //Apply the boolean operation
@@ -186,7 +241,31 @@ namespace sereno
 
     void applyVolumetricSelection_cloudPoint(const VolumetricMesh& mesh, SubDataset* sd)
     {
+        if(!sd->getParent()->areValuesLoaded())
+            return;
         const float* pos = ((CloudPointDataset*)sd->getParent())->getPointPositions();
         applyVolumetricSelection(mesh, sd, [pos](uint32_t k) {return glm::vec3(pos[3*k + 0], pos[3*k + 1], pos[3*k + 2]);});
+    }
+
+    void applyVolumetricSelection_vtk(const VolumetricMesh& mesh, SubDataset* sd)
+    {
+        const std::shared_ptr<VTKParser> vtkParser = ((VTKDataset*)sd->getParent())->getParser();
+
+        switch(vtkParser->getDatasetType())
+        {
+            case VTK_STRUCTURED_POINTS:
+            {
+                applyVolumetricSelection(mesh, sd, [vtkParser](uint32_t k) 
+                {
+                    return glm::vec3(k%vtkParser->getStructuredPointsDescriptor().size[0] / (float)vtkParser->getStructuredPointsDescriptor().size[0],
+                                     (k/vtkParser->getStructuredPointsDescriptor().size[0]) % vtkParser->getStructuredPointsDescriptor().size[1] / (float)vtkParser->getStructuredPointsDescriptor().size[1],
+                                     k/(vtkParser->getStructuredPointsDescriptor().size[0]*vtkParser->getStructuredPointsDescriptor().size[1]) / (float)vtkParser->getStructuredPointsDescriptor().size[2]) - glm::vec3(0.5f, 0.5f, 0.5f);
+                });
+                break;
+            }
+            default:
+                std::cerr << "Case " << vtkParser->getDatasetType() << " not handled yet for volumetric selection" << std::endl;
+                return;
+        }
     }
 }

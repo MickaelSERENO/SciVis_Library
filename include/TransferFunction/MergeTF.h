@@ -115,7 +115,6 @@ namespace sereno
             {
                 return m_t;
             }
-
         private:
             std::shared_ptr<TF> m_tf1 = NULL; /*!< The first transfer function to interpolate at m_t==0.0f*/
             std::shared_ptr<TF> m_tf2 = NULL; /*!< The second transfer function to interpolate at m_t==1.0f*/

@@ -135,9 +135,17 @@ namespace sereno
              * \param tf the transfer function to use */
             void setTransferFunction(std::shared_ptr<TF> tf) {m_tf = tf;}
 
-            /** \brief  Get the volumetric mask. We are using bit mask and not boolean objects. Size: (getParent()->getNbSpatialData()+7)/8
+            /** \brief  Get the volumetric mask. We are using bit mask and not boolean objects. Size: (getParent()->getNbSpatialData()+7)/8, see getVolumetricMaskSize
              * \return   the volumetric mask.  */
             const uint8_t* getVolumetricMask() const {return m_volumetricMask;}
+
+            /** \brief  Get the volumetric mask. We are using bit mask and not boolean objects. Size: (getParent()->getNbSpatialData()+7)/8, see getVolumetricMaskSize
+             * \return   the volumetric mask.  */
+            uint8_t* getVolumetricMask() {return m_volumetricMask;}
+
+            /** \brief  Get the size of the volumetric mask binary array
+             * \return  The size of getVolumetricMask() array */
+            size_t getVolumetricMaskSize() const;
 
             /** \brief Set the volumetric mask cell at x
              * \param x the spatial data indice to modify. The number of spatial value is getParent()->getNbSpatialData()

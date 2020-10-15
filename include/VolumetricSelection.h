@@ -19,9 +19,11 @@ namespace sereno
     /** \brief  The volumetric mesh data to use */
     struct VolumetricMesh
     {
-        std::vector<glm::vec3> points;
-        std::vector<uint32_t>  triangles;
-        BooleanSelectionOp     op = SELECTION_OP_NONE;
+        std::vector<glm::vec3> points;    /*!< The list of points for this mesh*/
+        std::vector<uint32_t>  triangles; /*!< The points IDs ordered to form triangles (each 3 values form a triangle)*/
+        BooleanSelectionOp     op;        /*!< The boolean operation to do with this mesh*/
+
+        VolumetricMesh(BooleanSelectionOp _op = SELECTION_OP_NONE) : op(_op){}
     };
 
     /** \brief  Our rastered cube space to fasten computation */

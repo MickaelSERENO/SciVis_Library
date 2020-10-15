@@ -83,9 +83,14 @@ namespace sereno
         return m_annotations.erase(it);
     }
 
+    size_t SubDataset::getVolumetricMaskSize() const 
+    {
+        return sizeof(uint8_t)*(m_parent->getNbSpatialData()+7)/8;
+    }
+
     void SubDataset::resetVolumetricMask(bool t, bool isReset)
     {
-        memset(m_volumetricMask, (t ? 0xff : 0x00), m_parent->getNbSpatialData());
+        memset(m_volumetricMask, (t ? 0xff : 0x00), getVolumetricMaskSize());
         m_noSelection = isReset;
     }
 
