@@ -78,9 +78,9 @@ namespace sereno
     template <typename T>
     void applyVolumetricSelection(const VolumetricMesh& mesh, SubDataset* sd, const T& spatialPosAt)
     {
-        const int CUBE_SIZE_X = 16;
-        const int CUBE_SIZE_Y = 16;
-        const int CUBE_SIZE_Z = 16;
+        const int CUBE_SIZE_X = 2;
+        const int CUBE_SIZE_Y = 2;
+        const int CUBE_SIZE_Z = 2;
 
         const int CUBE_SIZE[] = { CUBE_SIZE_X, CUBE_SIZE_Y, CUBE_SIZE_Z };
 
@@ -95,7 +95,7 @@ namespace sereno
         
         //First, transform every point using the provided matrix
         glm::vec3* points = new glm::vec3[mesh.points.size()];
-        glm::mat4  mat    = sd->getModelWorldMatrix();
+        glm::mat4  mat    = glm::inverse(sd->getModelWorldMatrix());
 
 #if defined(_OPENMP)
         #pragma omp parallel for
@@ -200,8 +200,8 @@ namespace sereno
             };
 
             //Select the most efficient direction (i.e., less test)
-            if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_Y + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
-                 rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_Y + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
+            if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
+                 rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
             { 
                 for(int j = particuleX; j < CUBE_SIZE_X; j++)
                     rayCastAction(j);

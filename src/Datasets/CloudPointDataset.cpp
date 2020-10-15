@@ -88,7 +88,7 @@ error:
             m_readThread.join();
     }
 
-    void CloudPointDataset::loadValues(LoadCallback clbk, void* userData)
+    std::thread* CloudPointDataset::loadValues(LoadCallback clbk, void* userData)
     {
         if(m_nbPoints == 0)
         {
@@ -167,18 +167,21 @@ error:
 
                     if(clbk)
                         clbk(this, 1, userData);
+                    m_readThreadRunning = false;
                 }
                 else
                 {
                     if(clbk)
                         clbk(this, 0, userData);
+                    m_readThreadRunning = false;
                     return;
                 }
             });
+
+            return &m_readThread;
         }
+        return NULL;
 #undef _BUFFER_SIZE
-
-
     }
 
     bool CloudPointDataset::create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const

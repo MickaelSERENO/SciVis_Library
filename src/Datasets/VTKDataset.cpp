@@ -59,7 +59,7 @@ namespace sereno
             free(m_mask);
     }
 
-    void VTKDataset::loadValues(LoadCallback clbk, void* data)
+    std::thread* VTKDataset::loadValues(LoadCallback clbk, void* data)
     {
         if(m_readThreadRunning == false)
         {
@@ -157,7 +157,11 @@ namespace sereno
                     clbk(this, 1, data);
                 m_readThreadRunning = false;
             });
+
+            return &m_readThread;
         }
+
+        return NULL;
     }
 
     DatasetGradient* VTKDataset::computeGradient(const std::vector<uint32_t>& indices)

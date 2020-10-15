@@ -70,7 +70,7 @@ namespace sereno
              * \return the direction encoded in a Quaternion */
             Quaternionf getRotationQuaternion(uint32_t x, uint32_t y, uint32_t z) const;
 
-            virtual void loadValues(LoadCallback clbk, void* data) {} //TODO
+            virtual std::thread* loadValues(LoadCallback clbk, void* data) {clbk(this, 0, data); return NULL;} //TODO
 
             virtual bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const {return false;} //TODO
 

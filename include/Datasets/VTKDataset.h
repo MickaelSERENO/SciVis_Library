@@ -64,7 +64,7 @@ namespace sereno
                 Dataset::removeSubDataset(sd);
             }
 
-            virtual void loadValues(LoadCallback clbk, void* data);
+            virtual std::thread* loadValues(LoadCallback clbk, void* data);
 
             virtual bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const;
 

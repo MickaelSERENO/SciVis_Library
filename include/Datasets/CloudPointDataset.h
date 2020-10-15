@@ -21,7 +21,7 @@ namespace sereno
             /*----------------------------------------------------------------------------*/
             /*------------------------Virtual Inherited Functions-------------------------*/
             /*----------------------------------------------------------------------------*/
-            void loadValues(LoadCallback clbk, void* data);
+            std::thread* loadValues(LoadCallback clbk, void* data);
             bool create1DHistogram(uint32_t* output, uint32_t width, uint32_t ptFieldXID) const;
             bool create2DHistogram(uint32_t* output, uint32_t width, uint32_t height, uint32_t ptFieldXID, uint32_t ptFieldYID) const;
 

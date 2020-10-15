@@ -5,6 +5,7 @@
 #include "Datasets/PointFieldDesc.h"
 #include <vector>
 #include <cstdint>
+#include <thread>
 
 namespace sereno
 {
@@ -146,8 +147,9 @@ namespace sereno
 
             /* \brief  Load the values of the Dataset in a separated thread.
              * \param clbk the callback function to call when the loading is finished
-             * \param data extra data to send to the callback function*/
-            virtual void loadValues(LoadCallback clbk, void* data) = 0;
+             * \param data extra data to send to the callback function
+             * \return a pointer to the thread reading the values or NULL in case of errors*/
+            virtual std::thread* loadValues(LoadCallback clbk, void* data) = 0;
 
             /* \brief  Are the values loaded?
              * \return   true if yes, false otherwise */
@@ -163,14 +165,14 @@ namespace sereno
 
             /** \brief  Get the minimum position (bounding box) of this dataset object in its local coordinate system
              * \return    3D point corresponding to the minimum position of the dataset's bounding box */
-            glm::vec3 getMinPos() const
+            const glm::vec3& getMinPos() const
             {
                 return m_minPos;
             }
 
             /** \brief  Get the maximum position (bounding box) of this dataset object in its local coordinate system
              * \return    3D point corresponding to the maximum position of the dataset's bounding box */
-            glm::vec3 getMaxPos() const
+            const glm::vec3& getMaxPos() const
             {
                 return m_maxPos;
             }
