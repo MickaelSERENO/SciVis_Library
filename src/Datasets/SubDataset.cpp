@@ -16,7 +16,7 @@ namespace sereno
         {
             size_t nbData = sizeof(uint8_t)*(parent->getNbSpatialData()+7)/8;
             m_volumetricMask = (uint8_t*)malloc(nbData);
-            memset(m_volumetricMask, 0xff, nbData);
+            resetVolumetricMask(false, false);
         }
         setID(id);
     }
@@ -88,10 +88,10 @@ namespace sereno
         return sizeof(uint8_t)*(m_parent->getNbSpatialData()+7)/8;
     }
 
-    void SubDataset::resetVolumetricMask(bool t, bool isReset)
+    void SubDataset::resetVolumetricMask(bool t, bool enable)
     {
         memset(m_volumetricMask, (t ? 0xff : 0x00), getVolumetricMaskSize());
-        m_noSelection = isReset;
+        m_enableVolumetricMask = enable;
     }
 
     glm::mat4 SubDataset::getModelWorldMatrix() const

@@ -168,12 +168,16 @@ namespace sereno
 
             /** \brief  Reset to false or true the volumetric mask 
              * \param t the reset value (false or true)
-             * \param isReset should we consider that no volumetric selection has been performed?*/
-            void resetVolumetricMask(bool t, bool isReset=true);
+             * \param isEnabled should we enable this volumetric mask?*/
+            void resetVolumetricMask(bool t, bool isEnabled=true);
 
-            /** \brief  If a volumetric selection performed?
+            /** \brief  If the volumetric selection enabled?
              * \return   true if no, false otherwise */
-            bool isVolumetricMaskReset() const {return m_noSelection;}
+            bool isVolumetricMaskEnabled() const {return m_enableVolumetricMask;}
+
+            /** \brief  Enable/Disable the volumetric mask
+             * \param e the enable value */
+            void enableVolumetricMask(bool e) {m_enableVolumetricMask = e;}
 
             /** \brief  Get the ID of this SUbDataset
              * \return   the subdataset ID */
@@ -196,8 +200,8 @@ namespace sereno
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
 #endif
-            uint8_t* m_volumetricMask = NULL; /*!< The volumetric mask*/
-            bool     m_noSelection    = true; /*!< Did we start to apply a volumetric selection on this SubDataset?*/
+            uint8_t* m_volumetricMask       = NULL;  /*!< The volumetric mask*/
+            bool     m_enableVolumetricMask = false; /*!< Should we consider the SubDataset volumetric mask?*/
         private:
             /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
              * \param id the new ID */
