@@ -33,7 +33,7 @@ namespace sereno
     {
         float _t = 0;
 
-        const float EPSILON = 0.0000001f;
+        const float EPSILON = 0.000000001f;
 
         glm::vec3 edge1 = triangle[1] - triangle[0];
         glm::vec3 edge2 = triangle[2] - triangle[0];
@@ -89,9 +89,6 @@ namespace sereno
             std::cerr << "The number of triangles is not a multiple of 3. Abort";
             return;
         }
-
-        if(sd->isVolumetricMaskReset())
-            sd->resetVolumetricMask(false, false);
         
         //First, transform every point using the provided matrix
         glm::vec3* points = new glm::vec3[mesh.points.size()];
@@ -105,6 +102,7 @@ namespace sereno
 
         //Second, initialize our raster 3D space. Each cell contains the list of triangles it contains. Indice(x, y, z) = z*CUBE_SIZE_X*CUBE_SIZE_Y + y*CUBE_SIZE_X + x
         RasteredCube* rasteredSpace = new RasteredCube[CUBE_SIZE_X*CUBE_SIZE_Y*CUBE_SIZE_Z];
+
         //Go through all the triangles. For each triangle, determine in which cells it is
         for(size_t i = 0; i < mesh.triangles.size()/3; i++)
         {
@@ -119,21 +117,23 @@ namespace sereno
                     return;
                 }
 
-                minPos[j] = MIN(points[mesh.triangles[3*i]][j], MIN(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
-                maxPos[j] = MAX(points[mesh.triangles[3*i]][j], MAX(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
+                minPos[j] = fmin(points[mesh.triangles[3*i]][j], fmin(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
+                maxPos[j] = fmax(points[mesh.triangles[3*i]][j], fmax(points[mesh.triangles[3*i+1]][j], points[mesh.triangles[3*i+2]][j]));
 
                 //Set them as indices in our 3D restered space
                 minPos[j] = CUBE_SIZE[j] * ((minPos[j] - sd->getParent()->getMinPos()[j]) / (sd->getParent()->getMaxPos()[j] - sd->getParent()->getMinPos()[j]));
                 maxPos[j] = CUBE_SIZE[j] * ((maxPos[j] - sd->getParent()->getMinPos()[j]) / (sd->getParent()->getMaxPos()[j] - sd->getParent()->getMinPos()[j]));
 
-                minPos[j] = MAX(0.0f,  minPos[j]);
-                maxPos[j] = MAX(-1.0f, maxPos[j]);
+                minPos[j] = fmax(0.0f,  minPos[j]);
+                maxPos[j] = fmax(-1.0f, maxPos[j]);
+                maxPos[j] = fmin(CUBE_SIZE[j]-1, maxPos[j]);
+                minPos[j] = fmin(CUBE_SIZE[j]-1, minPos[j]);
             }
 
             //Cross the bounding box and our 3D rastered space
-            for(int kk = (int)minPos[2]; kk <= (int)maxPos[2] && kk < CUBE_SIZE_Z; kk++)
-                for(int jj = (int)minPos[1]; jj <= (int)maxPos[1] && jj < CUBE_SIZE_Y; jj++)
-                    for(int ii = (int)minPos[0]; ii <= (int)maxPos[0] && ii < CUBE_SIZE_X; ii++)
+            for(int kk = (int)minPos[2]; kk <= (int)maxPos[2]; kk++)
+                for(int jj = (int)minPos[1]; jj <= (int)maxPos[1]; jj++)
+                    for(int ii = (int)minPos[0]; ii <= (int)maxPos[0]; ii++)
                         rasteredSpace[ii + CUBE_SIZE_X*jj + CUBE_SIZE_Y*CUBE_SIZE_X*kk].triangleIDs.push_back(i);
         }
 
@@ -151,6 +151,10 @@ namespace sereno
             }
         }
 
+        uint32_t nbSelection = 0;
+
+        std::cout << "Performing selection over " << sd->getParent()->getNbSpatialData() << std::endl;
+
         //Go through all the points of the dataset and check if it is inside or outside the Mesh
 
 #if defined(_OPENMP)
@@ -164,13 +168,13 @@ namespace sereno
             std::vector<int> triangleIDAlready;
 
             //The particule X position in the rastered space
-            int particuleX = (int)MIN(CUBE_SIZE_X-1, CUBE_SIZE_X * ((pos[0] - sd->getParent()->getMinPos()[0]) / (sd->getParent()->getMaxPos()[0] - sd->getParent()->getMinPos()[0])));
-            int particuleY = (int)MIN(CUBE_SIZE_Y-1, CUBE_SIZE_Y * ((pos[1] - sd->getParent()->getMinPos()[1]) / (sd->getParent()->getMaxPos()[1] - sd->getParent()->getMinPos()[1])));
-            int particuleZ = (int)MIN(CUBE_SIZE_Z-1, CUBE_SIZE_Z * ((pos[2] - sd->getParent()->getMinPos()[2]) / (sd->getParent()->getMaxPos()[2] - sd->getParent()->getMinPos()[2])));
+            int particuleX = (int)fmin(CUBE_SIZE_X-1, CUBE_SIZE_X * ((pos[0] - sd->getParent()->getMinPos()[0]) / (sd->getParent()->getMaxPos()[0] - sd->getParent()->getMinPos()[0])));
+            int particuleY = (int)fmin(CUBE_SIZE_Y-1, CUBE_SIZE_Y * ((pos[1] - sd->getParent()->getMinPos()[1]) / (sd->getParent()->getMaxPos()[1] - sd->getParent()->getMinPos()[1])));
+            int particuleZ = (int)fmin(CUBE_SIZE_Z-1, CUBE_SIZE_Z * ((pos[2] - sd->getParent()->getMinPos()[2]) / (sd->getParent()->getMaxPos()[2] - sd->getParent()->getMinPos()[2])));
 
-            particuleX = MAX(particuleX, 0);
-            particuleY = MAX(particuleY, 0);
-            particuleZ = MAX(particuleZ, 0);
+            particuleX = fmax(particuleX, 0);
+            particuleY = fmax(particuleY, 0);
+            particuleZ = fmax(particuleZ, 0);
 
             //Go through all the cubes
             glm::vec3 triangle[3];
@@ -200,22 +204,23 @@ namespace sereno
             };
 
             //Select the most efficient direction (i.e., less test)
-            if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
-                 rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
+//            if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
+//                 rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
             { 
-                for(int j = particuleX; j < CUBE_SIZE_X; j++)
+                for(int j = 0; j < CUBE_SIZE_X; j++)
                     rayCastAction(j);
             }
-            else
-            {
-                rayDir.x *= -1.0f;
-                for(int j = particuleX; j >= 0; j--)
-                    rayCastAction(j);
-            }
+//            else
+//            {
+//                rayDir.x *= -1.0f;
+//                for(int j = particuleX; j >= 0; j--)
+//                    rayCastAction(j);
+//            }
 
-            if(nbIntersection%2)
+            if(nbIntersection%2 == 1)
             {
                 std::cout << "Youpi! at " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
+                nbSelection++;
             }
 
             //Apply the boolean operation
@@ -234,6 +239,8 @@ namespace sereno
                     break;
             }
         }
+
+        std::cout << "NbSelections: " << nbSelection << std::endl;
 
         delete[] points;
         delete[] rasteredSpace;
