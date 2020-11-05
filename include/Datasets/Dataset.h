@@ -12,9 +12,9 @@ namespace sereno
     /** \brief Structure containing the gradient information for a given dataset */
     struct DatasetGradient
     {
-        std::vector<uint32_t>                indices; /*!< List of the value IDs being used for this gradient computation*/
-        std::unique_ptr<float, _FreeDeleter> grads;   /*!< The gradient values*/
-        float                                maxVal;  /*!< The max gradient values*/
+        std::vector<uint32_t>               indices; /*!< List of the value IDs being used for this gradient computation*/
+        std::vector<std::shared_ptr<float>> grads;   /*!< The gradient values per timestep*/
+        float                               maxVal;  /*!< The max gradient values*/
     };
 
     class Dataset;

@@ -33,13 +33,15 @@ namespace sereno
     }
 
     VTKDataset::VTKDataset(std::shared_ptr<VTKParser>& parser, const std::vector<const VTKFieldValue*>& ptFieldValues, 
-                           const std::vector<const VTKFieldValue*>& cellFieldValues) : m_ptFieldValues(ptFieldValues), m_cellFieldValues(cellFieldValues), m_parser(parser)
+                           const std::vector<const VTKFieldValue*>& cellFieldValues)
     {
+        m_timesteps.push_back({parser, ptFieldValues, cellFieldValues});
+
         //Create point field descriptors
-        m_pointFieldDescs.resize(m_ptFieldValues.size());
-        for(uint32_t i = 0; i < m_ptFieldValues.size(); i++)
+        m_pointFieldDescs.resize(ptFieldValues.size());
+        for(uint32_t i = 0; i < ptFieldValues.size(); i++)
         {
-            const VTKFieldValue* val = m_ptFieldValues[i];
+            const VTKFieldValue* val = ptFieldValues[i];
             PointFieldDesc* desc = &m_pointFieldDescs[i];
             *(static_cast<FieldValueMetaData*>(desc)) = *val;
             desc->id     = i;
@@ -67,13 +69,13 @@ namespace sereno
             m_readThread = std::thread([this, clbk, data]()
             {
                 //Get the mask
-                for(const VTKFieldValue* val : m_parser->getPointFieldValueDescriptors())
+                for(const VTKFieldValue* val : getParser()->getPointFieldValueDescriptors())
                 {
                     //Search with the name
                     if(val->name == "vtkValidPointMask" && val->nbValuePerTuple == 1)
                     {
                         //Save some space by using 1 bit == 1 value
-                        uint8_t* maskData = (uint8_t*)m_parser->parseAllFieldValues(val);
+                        uint8_t* maskData = (uint8_t*)getParser()->parseAllFieldValues(val);
                         m_mask = (uint8_t*)calloc((val->nbTuples+7)/8, sizeof(uint8_t));
                         for(uint32_t i = 0, k=0; i < val->nbTuples; k++)
                             for(uint32_t j = 0; j < 8 && i < val->nbTuples; j++, i++)
@@ -85,71 +87,75 @@ namespace sereno
                     }
                 }
 
-                for(uint32_t i = 0; i < m_ptFieldValues.size(); i++)
+                for(uint32_t t = 0; t < m_timesteps.size(); t++)
                 {
-                    const VTKFieldValue* val = m_ptFieldValues[i];
-                    uint8_t* data = (uint8_t*)m_parser->parseAllFieldValues(val);
-
-                    //Compute min/max
-                    double minVal = std::numeric_limits<double>::max();
-                    double maxVal = -minVal;
-
-                    uint8_t valueFormatInt = VTKValueFormatInt(val->format);
-
-                    //Scalar "min/max"
-                    if(m_pointFieldDescs[i].nbValuePerTuple == 1)
+                    for(uint32_t i = 0; i < getPtFieldValues().size(); i++)
                     {
-#if defined(_OPENMP)
-                        #pragma omp parallel for reduction(max:maxVal) reduction(min:minVal)
-#endif
-                        for(uint32_t k = 0; k < val->nbTuples; k++)
-                        {
-                            if(getMask(k))
-                            {
-                                double readVal = readParsedVTKValue<double>(data + k*valueFormatInt, val->format);
-                                minVal = (minVal < readVal ? minVal : readVal);
-                                maxVal = (maxVal > readVal ? maxVal : readVal);
-                            }
-                        }
-                    }
+                        const VTKTimeStep& timeStepData = getTimeStep(t);
+                        const VTKFieldValue* val = timeStepData.ptFieldValues[i];
+                        uint8_t* data = (uint8_t*)timeStepData.parser->parseAllFieldValues(val);
 
-                    //Magnitude "min/max" (vector magnitude)
-                    else
-                    {
-#if defined(_OPENMP)
-                        #pragma omp parallel
-#endif
+                        //Compute min/max
+                        double minVal = std::numeric_limits<double>::max();
+                        double maxVal = -minVal;
+
+                        uint8_t valueFormatInt = VTKValueFormatInt(val->format);
+
+                        //Scalar "min/max"
+                        if(m_pointFieldDescs[i].nbValuePerTuple == 1)
                         {
 #if defined(_OPENMP)
-                            #pragma omp for reduction(max:maxVal) reduction(min:minVal)
+                            #pragma omp parallel for reduction(max:maxVal) reduction(min:minVal)
 #endif
                             for(uint32_t k = 0; k < val->nbTuples; k++)
                             {
-                                if(!getMask(k))
-                                    continue;
-                                double mag = 0;
-                                for(uint32_t j = 0; j < val->nbValuePerTuple; j++)
+                                if(getMask(k))
                                 {
-                                    double readVal = readParsedVTKValue<double>(data + k*valueFormatInt*val->nbValuePerTuple + j*valueFormatInt, val->format);
-                                    mag = readVal*readVal;
+                                    double readVal = readParsedVTKValue<double>(data + k*valueFormatInt, val->format);
+                                    minVal = (minVal < readVal ? minVal : readVal);
+                                    maxVal = (maxVal > readVal ? maxVal : readVal);
                                 }
-                                
-                                mag = sqrt(mag);
-                                minVal = fmin(minVal, mag);
-                                maxVal = fmax(maxVal, mag);
                             }
                         }
+
+                        //Magnitude "min/max" (vector magnitude)
+                        else
+                        {
+#if defined(_OPENMP)
+                            #pragma omp parallel
+#endif
+                            {
+#if defined(_OPENMP)
+                                #pragma omp for reduction(max:maxVal) reduction(min:minVal)
+#endif
+                                for(uint32_t k = 0; k < val->nbTuples; k++)
+                                {
+                                    if(!getMask(k))
+                                        continue;
+                                    double mag = 0;
+                                    for(uint32_t j = 0; j < val->nbValuePerTuple; j++)
+                                    {
+                                        double readVal = readParsedVTKValue<double>(data + k*valueFormatInt*val->nbValuePerTuple + j*valueFormatInt, val->format);
+                                        mag = readVal*readVal;
+                                    }
+                                    
+                                    mag = sqrt(mag);
+                                    minVal = fmin(minVal, mag);
+                                    maxVal = fmax(maxVal, mag);
+                                }
+                            }
+                        }
+
+                        m_pointFieldDescs[i].maxVal = maxVal;
+                        m_pointFieldDescs[i].minVal = minVal;
+                        m_pointFieldDescs[i].values.emplace_back(data, _FreeDeleter());
                     }
 
-                    m_pointFieldDescs[i].maxVal = maxVal;
-                    m_pointFieldDescs[i].minVal = minVal;
-                    m_pointFieldDescs[i].values.reset(data);
+                    std::vector<uint32_t> fields;
+                    for(uint32_t i = 0; i < getPtFieldValues().size(); i++)
+                        fields.push_back(i);
+                    getOrComputeGradient(fields);
                 }
-
-                std::vector<uint32_t> fields;
-                fields.reserve(m_pointFieldDescs.size());
-
-                getOrComputeGradient(fields);
 
                 //Computation done, set the state to "loaded" and call the callback function
                 m_valuesLoaded = true;
@@ -166,7 +172,7 @@ namespace sereno
 
     DatasetGradient* VTKDataset::computeGradient(const std::vector<uint32_t>& indices)
     {
-        const VTKStructuredPoints& ptsDesc = m_parser->getStructuredPointsDescriptor();
+        const VTKStructuredPoints& ptsDesc = getParser()->getStructuredPointsDescriptor();
         float* grads = (float*)malloc(sizeof(float)*ptsDesc.size[0]*ptsDesc.size[1]*ptsDesc.size[2]);
 
         /*----------------------------------------------------------------------------*/
@@ -200,7 +206,7 @@ namespace sereno
                             {
                                 const PointFieldDesc& ptFieldValue = m_pointFieldDescs[indices[l]];
                                 int formatSize = VTKValueFormatInt(ptFieldValue.format);
-                                uint8_t* vals = (uint8_t*)ptFieldValue.values.get();
+                                uint8_t* vals = (uint8_t*)ptFieldValue.values[0].get();
 
                                 if(ptFieldValue.nbValuePerTuple == 1)
                                 {
@@ -265,7 +271,7 @@ namespace sereno
         {
             const PointFieldDesc& ptFieldValue = m_pointFieldDescs[indices[0]];
             int formatSize = VTKValueFormatInt(ptFieldValue.format);
-            uint8_t* vals = (uint8_t*)ptFieldValue.values.get();
+            uint8_t* vals = (uint8_t*)ptFieldValue.values[0].get();
 
             if(ptFieldValue.nbValuePerTuple == 1)
             {
@@ -389,7 +395,7 @@ namespace sereno
 
         DatasetGradient* gradientData = new DatasetGradient();
         gradientData->maxVal = maxGrad;
-        gradientData->grads.reset(grads);
+        gradientData->grads.emplace_back(grads, _FreeDeleter());
         gradientData->indices = indices;
 
         return gradientData;
@@ -428,7 +434,7 @@ namespace sereno
                 #pragma omp for
                 for(uint32_t i = 0; i < ptX.nbTuples; i++)
                 {
-                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat, ptX.format);
+                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat, ptX.format);
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
                     privateHisto[x]++;
                 }
@@ -443,7 +449,7 @@ namespace sereno
                     float xVal = 0.0;
                     for(uint32_t k = 0; k < ptX.nbValuePerTuple; k++)
                     {
-                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
+                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
                     xVal = sqrt(xVal);
@@ -468,7 +474,7 @@ namespace sereno
             {
                 for(uint32_t i = 0; i < ptX.nbTuples; i++)
                 {
-                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat, ptX.format);
+                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat, ptX.format);
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
                     output[x]++;
                 }
@@ -482,7 +488,7 @@ namespace sereno
                     float xVal = 0.0;
                     for(uint32_t k = 0; k < ptX.nbValuePerTuple; k++)
                     {
-                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
+                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
                     xVal = sqrt(xVal);
@@ -533,10 +539,10 @@ namespace sereno
                 #pragma omp for
                 for(uint32_t i = 0; i < ptX.nbTuples; i++)
                 {
-                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat, ptX.format);
+                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat, ptX.format);
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
-                    float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat, ptY.format);
+                    float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat, ptY.format);
                     uint32_t y = MIN(height*(yVal-ptY.minVal)/yDiv, height-1);
 
                     privateHisto[y*width + x]+=1;
@@ -548,14 +554,14 @@ namespace sereno
                 #pragma omp for
                 for(uint32_t i = 0; i < ptX.nbValuePerTuple; i++)
                 {
-                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat, ptX.format);
+                    float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat, ptX.format);
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                     //Take the magnitude
                     float yVal = 0.0;
                     for(uint32_t k = 0; k < ptY.nbValuePerTuple; k++)
                     {
-                        float val = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
+                        float val = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                         yVal = val*val;
                     }
                     uint32_t y = MIN(height*(sqrt(yVal) - ptY.minVal)/yDiv, height-1);
@@ -572,12 +578,12 @@ namespace sereno
                     float xVal = 0.0;
                     for(uint32_t k = 0; k < ptX.nbValuePerTuple; k++)
                     {
-                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
+                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
                     xVal = sqrt(xVal);
 
-                    float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat, ptY.format);
+                    float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat, ptY.format);
                     uint32_t x = MIN((xVal - ptX.minVal)/xDiv, width-1);
                     uint32_t y = MIN((yVal - ptY.minVal)/yDiv, height-1);
                     privateHisto[y*width + x]++;
@@ -592,7 +598,7 @@ namespace sereno
                     float xVal = 0.0;
                     for(uint32_t k = 0; k < ptX.nbValuePerTuple; k++)
                     {
-                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
+                        float val = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
                     xVal = sqrt(xVal);
@@ -600,7 +606,7 @@ namespace sereno
                     float yVal = 0.0;
                     for(uint32_t k = 0; k < ptY.nbValuePerTuple; k++)
                     {
-                        float val = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
+                        float val = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                         yVal = val*val;
                     }
                     yVal = sqrt(yVal);
@@ -626,10 +632,10 @@ namespace sereno
         {
             for(uint32_t i = 0; i < ptX.nbTuples; i++)
             {
-                float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat, ptX.format);
+                float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat, ptX.format);
                 uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
-                float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat, ptY.format);
+                float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat, ptY.format);
                 uint32_t y = MIN(height*(yVal-ptY.minVal)/yDiv, height-1);
 
                 output[y*width + x]++;
@@ -640,14 +646,14 @@ namespace sereno
         {
             for(uint32_t i = 0; i < ptX.nbValuePerTuple; i++)
             {
-                float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat, ptX.format);
+                float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat, ptX.format);
                 uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                 //Take the magnitude
                 float yVal = 0.0;
                 for(uint32_t k = 0; k < ptY.nbValuePerTuple; k++)
                 {
-                    float val = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
+                    float val = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                     yVal = val*val;
                 }
                 uint32_t y = MIN(height*(sqrt(yVal) - ptY.minVal)/yDiv, height-1);
@@ -663,12 +669,12 @@ namespace sereno
                 float xVal = 0.0;
                 for(uint32_t k = 0; k < ptX.nbValuePerTuple; k++)
                 {
-                    float val = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
+                    float val = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                     xVal = val*val;
                 }
                 xVal = sqrt(xVal);
 
-                float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat, ptY.format);
+                float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat, ptY.format);
                 uint32_t x = MIN((xVal - ptX.minVal)/xDiv, width-1);
                 uint32_t y = MIN((yVal - ptY.minVal)/yDiv, height-1);
                 output[y*width + x]++;
@@ -682,7 +688,7 @@ namespace sereno
                 float xVal = 0.0;
                 for(uint32_t k = 0; k < ptX.nbValuePerTuple; k++)
                 {
-                    float val = readParsedVTKValue<float>((uint8_t*)ptX.values.get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
+                    float val = readParsedVTKValue<float>((uint8_t*)ptX.values[0].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                     xVal = val*val;
                 }
                 xVal = sqrt(xVal);
@@ -690,7 +696,7 @@ namespace sereno
                 float yVal = 0.0;
                 for(uint32_t k = 0; k < ptY.nbValuePerTuple; k++)
                 {
-                    float val = readParsedVTKValue<float>((uint8_t*)ptY.values.get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
+                    float val = readParsedVTKValue<float>((uint8_t*)ptY.values[0].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                     yVal = val*val;
                 }
                 yVal = sqrt(yVal);

@@ -10,6 +10,15 @@
 
 namespace sereno
 {
+    /** \brief  A VTKTimeStep structure containing meta data for any timestep */
+    struct VTKTimeStep
+    {
+        std::shared_ptr<VTKParser>        parser;          /*!< The VTKParser containing the timestep data*/
+        std::vector<const VTKFieldValue*> ptFieldValues;   /*!< The point field values*/
+        std::vector<const VTKFieldValue*> cellFieldValues; /*!< The cell  field values*/
+        bool                              isLoaded=false;  /*!< Is this timestep loaded?*/
+    };
+
     /** \brief  Represent a VTK dataset information to take account of */
     class VTKDataset : public Dataset
     {
@@ -25,22 +34,37 @@ namespace sereno
 
             ~VTKDataset();
 
+            /** \brief  Add another timestep in this VTKDataset object
+             * \param parser the VTKParser containing the new timestep data
+             * \return  true on success, false on failure. The ptFieldValues and cellFieldValues to take into account must be the same, as should be the spatial resolution of the dataset. The loading of the values should not have started yet */
+            bool addTimestep(std::shared_ptr<VTKParser>& parser);
+
             /* \brief  Get the Parser containing the dataset data
+             * \param t the timestep to look at
              * \return  the VTKParser */
-            const std::shared_ptr<VTKParser> getParser() const {return m_parser;}
+            const std::shared_ptr<VTKParser> getParser(uint32_t t=0) const {return m_timesteps[t].parser;}
 
             /**
              * \brief  Get the point field values
-             * \return   the VTKFieldValue* objects
-             */
-            const std::vector<const VTKFieldValue*>& getPtFieldValues() const {return m_ptFieldValues;}
+             * \param t the timestep to look at
+             * \return   the VTKFieldValue* objects */
+            const std::vector<const VTKFieldValue*>& getPtFieldValues(uint32_t t=0) const {return m_timesteps[t].ptFieldValues;}
 
-            /* \brief  Get the indice of the point field value <value> in the Dataset (VTKParser) array
+            /** \brief  Get the timestep data at t
+             * \param t the time to look at. Must be inferior at getNbTimeSteps or the behavior is undefined.
+             * \return  a const reference to the timestep at t */
+            const VTKTimeStep& getTimeStep(uint32_t t) const {return m_timesteps[t];}
+
+            /** \brief  Get the number of registered timesteps
+             * \return   the number of registered timesteps */
+            uint32_t getNbTimeSteps() const {return m_timesteps.size();}
+
+            /* \brief  Get the indice of the point field value <value> in the Dataset (VTKParser) array of the first VTKParser (useful for sharing data)
              * \param value the value to look at
              * \return  the indice of the value. -1 if not found */
             int32_t getPtFieldValueIndice(const VTKFieldValue* value) const 
             {
-                std::vector<const VTKFieldValue*> values = m_parser->getPointFieldValueDescriptors();
+                std::vector<const VTKFieldValue*> values = getParser()->getPointFieldValueDescriptors();
                 for(size_t i = 0; i < values.size(); i++)
                     if(values[i] == value)
                         return i;
@@ -52,7 +76,7 @@ namespace sereno
              * \return  the indice of the value. -1 if not found */
             int32_t getCellFieldValueIndice(const VTKFieldValue* value) const 
             {
-                std::vector<const VTKFieldValue*> values = m_parser->getCellFieldValueDescriptors();
+                std::vector<const VTKFieldValue*> values = getParser()->getCellFieldValueDescriptors();
                 for(size_t i = 0; i < values.size(); i++)
                     if(values[i] == value)
                         return i;
@@ -101,12 +125,10 @@ namespace sereno
              */
             void computeMultiDGradient();
 
-            std::vector<const VTKFieldValue*> m_ptFieldValues;     /*!< The point field values*/
-            std::vector<const VTKFieldValue*> m_cellFieldValues;   /*!< The cell  field values*/
-            std::shared_ptr<VTKParser>        m_parser;            /*!< The VTK parser*/
-            uint8_t*                          m_mask = NULL;       /*!< The mask values to apply. Here, 1 bit == 1 value*/
-            std::thread                       m_readThread;        /*!< The reading thread*/
-            bool                              m_readThreadRunning = false; /*!< Is the reading thread running?*/
+            std::vector<VTKTimeStep> m_timesteps;         /*!< The timestep this data contain*/
+            uint8_t*                 m_mask = NULL;       /*!< The mask values to apply. Here, 1 bit == 1 value*/
+            std::thread              m_readThread;        /*!< The reading thread*/
+            bool                     m_readThreadRunning = false; /*!< Is the reading thread running?*/
     };
 }
 

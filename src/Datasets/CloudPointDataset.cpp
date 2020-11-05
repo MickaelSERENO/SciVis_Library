@@ -159,7 +159,7 @@ error:
 
                     m_pointFieldDescs[0].minVal = minVal;
                     m_pointFieldDescs[0].maxVal = maxVal;
-                    m_pointFieldDescs[0].values.reset(data);
+                    m_pointFieldDescs[0].values.emplace_back(data, _FreeDeleter());
 
                     m_valuesLoaded = true;
 
@@ -201,7 +201,7 @@ error:
         const PointFieldDesc& ptX = m_pointFieldDescs[0];
         const float xDiv = ptX.maxVal - ptX.minVal;
 
-        float* data = (float*)ptX.values.get();
+        float* data = (float*)ptX.values[0].get();
 
 #if defined(_OPENMP)
 #pragma omp parallel
