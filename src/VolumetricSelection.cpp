@@ -78,9 +78,9 @@ namespace sereno
     template <typename T>
     void applyVolumetricSelection(const VolumetricMesh& mesh, SubDataset* sd, const T& spatialPosAt)
     {
-        const int CUBE_SIZE_X = 2;
-        const int CUBE_SIZE_Y = 2;
-        const int CUBE_SIZE_Z = 2;
+        const int CUBE_SIZE_X = 8;
+        const int CUBE_SIZE_Y = 8;
+        const int CUBE_SIZE_Z = 8;
 
         const int CUBE_SIZE[] = { CUBE_SIZE_X, CUBE_SIZE_Y, CUBE_SIZE_Z };
 
@@ -107,9 +107,10 @@ namespace sereno
         for(size_t i = 0; i < mesh.triangles.size()/3; i++)
         {
             //Get the bounding box of the triangle
-            glm::vec3 minPos;
-            glm::vec3 maxPos;
-            for(int j = 0; j < 3; j++)
+            glm::vec3 minPos(0,0,0);
+            glm::vec3 maxPos(0,0,0);
+
+            for(uint8_t j = 0; j < 3; j++)
             {
                 if(mesh.triangles[3*i] > mesh.points.size())
                 {
@@ -125,9 +126,10 @@ namespace sereno
                 maxPos[j] = CUBE_SIZE[j] * ((maxPos[j] - sd->getParent()->getMinPos()[j]) / (sd->getParent()->getMaxPos()[j] - sd->getParent()->getMinPos()[j]));
 
                 minPos[j] = fmax(0.0f,  minPos[j]);
+                minPos[j] = fmin(CUBE_SIZE[j]-1, minPos[j]);
+
                 maxPos[j] = fmax(-1.0f, maxPos[j]);
                 maxPos[j] = fmin(CUBE_SIZE[j]-1, maxPos[j]);
-                minPos[j] = fmin(CUBE_SIZE[j]-1, minPos[j]);
             }
 
             //Cross the bounding box and our 3D rastered space
@@ -151,12 +153,7 @@ namespace sereno
             }
         }
 
-        uint32_t nbSelection = 0;
-
-        std::cout << "Performing selection over " << sd->getParent()->getNbSpatialData() << std::endl;
-
         //Go through all the points of the dataset and check if it is inside or outside the Mesh
-
 #if defined(_OPENMP)
         #pragma omp parallel for
 #endif
@@ -196,7 +193,6 @@ namespace sereno
                         if (std::find(triangleIDAlready.begin(), triangleIDAlready.end(), triangleID) != triangleIDAlready.end())
                             continue;
 
-                        std::cout << "Intersection at " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
                         nbIntersection++;
                         triangleIDAlready.push_back(triangleID);
                     }
@@ -204,23 +200,17 @@ namespace sereno
             };
 
             //Select the most efficient direction (i.e., less test)
-//            if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
-//                 rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
+            if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
+                 rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
             { 
                 for(int j = 0; j < CUBE_SIZE_X; j++)
                     rayCastAction(j);
             }
-//            else
-//            {
-//                rayDir.x *= -1.0f;
-//                for(int j = particuleX; j >= 0; j--)
-//                    rayCastAction(j);
-//            }
-
-            if(nbIntersection%2 == 1)
+            else
             {
-                std::cout << "Youpi! at " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
-                nbSelection++;
+                rayDir.x *= -1.0f;
+                for(int j = particuleX; j >= 0; j--)
+                    rayCastAction(j);
             }
 
             //Apply the boolean operation
@@ -239,8 +229,6 @@ namespace sereno
                     break;
             }
         }
-
-        std::cout << "NbSelections: " << nbSelection << std::endl;
 
         delete[] points;
         delete[] rasteredSpace;
