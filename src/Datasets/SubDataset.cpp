@@ -56,6 +56,8 @@ namespace sereno
 
     SubDataset::~SubDataset()
     {
+        if(m_volumetricMask)
+            free(m_volumetricMask);
     }
 
     Annotation* SubDataset::emplaceAnnotation(uint32_t w, uint32_t h, float* position)
