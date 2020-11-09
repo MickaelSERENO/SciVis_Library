@@ -209,6 +209,10 @@ namespace sereno
              * \param indices the indices to look at
              * \return  NULL if an error occured, the DatasetGradient information otherwise */
             DatasetGradient* getOrComputeGradient(const std::vector<uint32_t>& indices);
+
+            /** \brief  Get the number of registered timesteps in this dataset
+             * \return  The number of timesteps that this dataset contains */
+            uint32_t getNbTimesteps() const {return m_nbTimesteps;}
         protected:
             /** \brief  Computes and stores the gradient of the field considering a subset of the field parameters
              * \param indices the transfer
@@ -232,6 +236,8 @@ namespace sereno
 
             glm::vec3 m_minPos; /*!< The minimum position of the bounding box*/
             glm::vec3 m_maxPos; /*!< The maximum position of the bounding box*/
+
+            uint32_t m_nbTimesteps = 0; /*!< The number of registered timesteps*/
     };
 }
 

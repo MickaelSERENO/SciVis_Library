@@ -10,13 +10,12 @@
 
 namespace sereno
 {
-    /** \brief  A VTKTimeStep structure containing meta data for any timestep */
-    struct VTKTimeStep
+    /** \brief  A VTKTimestep structure containing meta data for any timestep */
+    struct VTKTimestep
     {
         std::shared_ptr<VTKParser>        parser;          /*!< The VTKParser containing the timestep data*/
         std::vector<const VTKFieldValue*> ptFieldValues;   /*!< The point field values*/
         std::vector<const VTKFieldValue*> cellFieldValues; /*!< The cell  field values*/
-        bool                              isLoaded=false;  /*!< Is this timestep loaded?*/
     };
 
     /** \brief  Represent a VTK dataset information to take account of */
@@ -51,13 +50,13 @@ namespace sereno
             const std::vector<const VTKFieldValue*>& getPtFieldValues(uint32_t t=0) const {return m_timesteps[t].ptFieldValues;}
 
             /** \brief  Get the timestep data at t
-             * \param t the time to look at. Must be inferior at getNbTimeSteps or the behavior is undefined.
+             * \param t the time to look at. Must be inferior at getNbTimesteps or the behavior is undefined.
              * \return  a const reference to the timestep at t */
-            const VTKTimeStep& getTimeStep(uint32_t t) const {return m_timesteps[t];}
+            const VTKTimestep& getTimestep(uint32_t t) const {return m_timesteps[t];}
 
             /** \brief  Get the number of registered timesteps
              * \return   the number of registered timesteps */
-            uint32_t getNbTimeSteps() const {return m_timesteps.size();}
+            uint32_t getNbTimesteps() const {return m_timesteps.size();}
 
             /* \brief  Get the indice of the point field value <value> in the Dataset (VTKParser) array of the first VTKParser (useful for sharing data)
              * \param value the value to look at
@@ -125,7 +124,7 @@ namespace sereno
              */
             void computeMultiDGradient();
 
-            std::vector<VTKTimeStep> m_timesteps;         /*!< The timestep this data contain*/
+            std::vector<VTKTimestep> m_timesteps;         /*!< The timestep this data contain*/
             uint8_t*                 m_mask = NULL;       /*!< The mask values to apply. Here, 1 bit == 1 value*/
             std::thread              m_readThread;        /*!< The reading thread*/
             bool                     m_readThreadRunning = false; /*!< Is the reading thread running?*/
