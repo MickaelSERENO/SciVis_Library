@@ -85,10 +85,19 @@ namespace sereno
             /** \brief  get the array of the enabled dimensions.
              * \return the enabled dimensions. array[i] == dimensions[i].enabled.*/
             const std::vector<bool>& getEnabledDimensions() const {return m_enabled;}
+
+            /** \brief Get the current timestep to apply to your data visualization
+             * \return the current timestep. */
+            float getCurrentTimestep() const {return m_currentTimestep;}
+
+            /** \brief Set the current timestep to apply to your data visualization
+             * \param t the current timestep to apply. Must be positive. */
+            void setCurrentTimestep(float t) {m_currentTimestep = t;}
         protected:
-            std::vector<bool> m_enabled; /*!< m_enabled[ids] == true if enabled, false otherwise. Size: m_dim. */
-            uint32_t  m_dim;  /*!< The transfer function dimension*/
-            ColorMode m_mode; /*!< The color mode*/
+            std::vector<bool> m_enabled;     /*!< m_enabled[ids] == true if enabled, false otherwise. Size: m_dim. */
+            uint32_t  m_dim;                 /*!< The transfer function dimension*/
+            ColorMode m_mode;                /*!< The color mode*/
+            float     m_currentTimestep = 0; /*!< The current timestep*/
     };
 
     /* \brief  Compute the transfer function texels. The dimension of the transfer function must be inferior at 1024
