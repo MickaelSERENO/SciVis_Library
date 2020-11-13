@@ -43,11 +43,15 @@ namespace sereno
              * \return  the VTKParser */
             const std::shared_ptr<VTKParser> getParser(uint32_t t=0) const {return m_timesteps[t].parser;}
 
-            /**
-             * \brief  Get the point field values
+            /** \brief  Get the point field values
              * \param t the timestep to look at
              * \return   the VTKFieldValue* objects */
             const std::vector<const VTKFieldValue*>& getPtFieldValues(uint32_t t=0) const {return m_timesteps[t].ptFieldValues;}
+
+            /** \brief  Get the cell field values
+             * \param t the timestep to look at
+             * \return   the VTKFieldValue* objects */
+            const std::vector<const VTKFieldValue*>& getCellFieldValues(uint32_t t=0) const {return m_timesteps[t].cellFieldValues;}
 
             /** \brief  Get the timestep data at t
              * \param t the time to look at. Must be inferior at getNbTimesteps or the behavior is undefined.

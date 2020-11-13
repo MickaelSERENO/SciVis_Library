@@ -21,6 +21,6 @@ cd ../
 
 #Linux x64
 cd linux_x64_build
-PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/lib/pkgconfig/ cmake ../ -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/.local/ -DCMAKE_CXX_FLAGS="-I $HOME/.local/include" -DRELEASE=TRUE
+PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.local/lib/pkgconfig/ cmake ../ -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/.local/ -DCMAKE_CXX_FLAGS="-I $HOME/.local/include" -DRELEASE=FALSE
 ninja install
 cd ../

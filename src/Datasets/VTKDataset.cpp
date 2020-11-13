@@ -73,15 +73,26 @@ namespace sereno
         //Build the field values. We should find the same in the first VTKParser and in the one that is being added. If not --> error
         std::vector<const VTKFieldValue*> ptFieldValues;
         std::vector<const VTKFieldValue*> cellFieldValues;
+
+        std::vector<const VTKFieldValue*> parserPt   = parser->getPointFieldValueDescriptors();
+        std::vector<const VTKFieldValue*> parserCell = parser->getCellFieldValueDescriptors();
         for(const FieldValueMetaData* f : getPtFieldValues())
         {
-            auto it = std::find_if(parser->getPointFieldValueDescriptors().begin(), parser->getPointFieldValueDescriptors().end(), [f](const FieldValueMetaData* v){return *v == *f;});
-            if(it == parser->getPointFieldValueDescriptors().end())
+            auto it = std::find_if(parserPt.begin(), parserPt.end(), [f](const FieldValueMetaData* v)
+            {
+                return *v == *f;
+            });
+            if(it == parserPt.end())
                 return false;
+            ptFieldValues.push_back(*it);
+        }
 
-            auto it2 = std::find_if(parser->getCellFieldValueDescriptors().begin(), parser->getCellFieldValueDescriptors().end(), [f](const FieldValueMetaData* v){return *v == *f;});
-            if(it2 == parser->getCellFieldValueDescriptors().end())
+        for(const FieldValueMetaData* f : getCellFieldValues())
+        {
+            auto it2 = std::find_if(parserCell.begin(), parserCell.end(), [f](const FieldValueMetaData* v){return *v == *f;});
+            if(it2 == parserCell.end())
                 return false;
+            parserCell.push_back(*it2);
         }
 
         //Add the correctely parsed timestep
@@ -203,7 +214,6 @@ namespace sereno
     DatasetGradient* VTKDataset::computeGradient(const std::vector<uint32_t>& indices)
     {
         const VTKStructuredPoints& ptsDesc = getParser()->getStructuredPointsDescriptor();
-        float* grads = (float*)malloc(sizeof(float)*ptsDesc.size[0]*ptsDesc.size[1]*ptsDesc.size[2]);
 
         /*----------------------------------------------------------------------------*/
         /*--------------------------Compute gradient values---------------------------*/
@@ -215,6 +225,7 @@ namespace sereno
 
         for(uint32_t t = 0; t < m_nbTimesteps; t++)
         {
+            float* grads = (float*)malloc(sizeof(float)*ptsDesc.size[0]*ptsDesc.size[1]*ptsDesc.size[2]);
             if(indices.size() > 1)
             {
                 //The Df matrice, see the doxygen
