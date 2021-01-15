@@ -68,6 +68,8 @@ class CSVRow
 
         std::vector<std::string>::const_iterator begin() const {return m_data.begin();}
         std::vector<std::string>::const_iterator end()   const {return m_data.end();}
+
+        const std::vector<std::string>& getData() const {return m_data;}
     private:
         char m_separator;
         std::vector<std::string> m_data;

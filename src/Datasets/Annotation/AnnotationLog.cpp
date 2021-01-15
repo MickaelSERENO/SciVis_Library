@@ -1,0 +1,105 @@
+#include "Datasets/Annotation/AnnotationLog.h"
+#include <fstream>
+
+namespace sereno
+{
+    int32_t AnnotationLog::indiceFromHeader(const std::vector<std::string>& headers, const std::string& header)
+    {
+        int32_t it = -1;
+        for(uint32_t i = 0; i < headers.size(); i++)
+            if(headers[i] == header)
+                it = i;
+        return it;
+    }
+
+    AnnotationLog::AnnotationLog(bool header) : m_hasHeader(header)
+    {}
+
+    AnnotationLog::~AnnotationLog() 
+    {}
+
+    bool AnnotationLog::readFromCSV(const std::string& path)
+    {
+        std::ifstream file(path);
+        if(!file.good())
+        {
+            std::cerr << "Could not open the file " << path << std::endl; 
+            return false;
+        }
+
+        int32_t size = -1;
+
+        //Clear values
+        m_header.clear();
+        m_values.clear();
+
+        //Read header
+        if(m_hasHeader)
+        {
+            CSVRow row;
+            file >> row;
+            m_header = row.getData();
+            size = m_header.size();
+        }
+
+        //Read values
+        for(auto& it : CSVRange(file))
+        {
+            if(size != -1)
+            {
+                if((int32_t)it.size() != size)
+                {
+                    std::cerr << "Error in file " << path << " : Different column numbers per row\n";
+                    return false;
+                }
+            }
+            else
+                size = it.size();
+            m_values.emplace_back(std::move(it.getData()), (m_hasHeader?&m_header:NULL));
+        }
+
+        m_timeIT  = 0;
+        m_hasRead = true;
+
+        return true;
+    }
+
+    bool AnnotationLog::setTimeColumn(uint32_t timeCol)
+    {
+        if(!m_hasRead)
+            return false;
+
+        if(m_hasHeader)
+        {
+            if(timeCol >= m_header.size())
+                return false;
+            m_timeIT = timeCol;
+        }
+        else
+        {
+            if(m_values.size())
+            {
+                if(timeCol >= m_values[0].size())
+                    return false;
+                m_timeIT = timeCol;
+            }
+            else
+                m_timeIT = timeCol;
+        }
+        return true;
+    }
+
+    bool AnnotationLog::setTimeColumn(const std::string& timeHeader)
+    {
+        if(!m_hasRead || !m_hasHeader)
+            return false;
+
+        int32_t timeCol = indiceFromHeader(m_header, timeHeader);
+
+        if(timeCol == -1)
+            return false;
+
+        m_timeIT = timeCol;
+        return true;
+    }
+}
