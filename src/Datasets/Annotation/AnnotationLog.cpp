@@ -5,11 +5,10 @@ namespace sereno
 {
     int32_t AnnotationLog::indiceFromHeader(const std::vector<std::string>& headers, const std::string& header)
     {
-        int32_t it = -1;
         for(uint32_t i = 0; i < headers.size(); i++)
             if(headers[i] == header)
-                it = i;
-        return it;
+                return i;
+        return -1;
     }
 
     AnnotationLog::AnnotationLog(bool header) : m_hasHeader(header)
@@ -64,14 +63,20 @@ namespace sereno
         return true;
     }
 
-    bool AnnotationLog::setTimeColumn(uint32_t timeCol)
+    bool AnnotationLog::setTimeColumn(int32_t timeCol)
     {
+        if(timeCol < 0)
+        {
+            m_timeIT = timeCol;
+            return true;
+        }
+
         if(!m_hasRead)
             return false;
 
         if(m_hasHeader)
         {
-            if(timeCol >= m_header.size())
+            if(timeCol >= (int32_t)m_header.size())
                 return false;
             m_timeIT = timeCol;
         }
@@ -79,7 +84,7 @@ namespace sereno
         {
             if(m_values.size())
             {
-                if(timeCol >= m_values[0].size())
+                if(timeCol >= (int32_t)m_values[0].size())
                     return false;
                 m_timeIT = timeCol;
             }
@@ -101,5 +106,15 @@ namespace sereno
 
         m_timeIT = timeCol;
         return true;
+    }
+
+    const std::string& AnnotationLog::LogEntry::operator[](const std::string& index) const
+    {
+       return (*this)[AnnotationLog::indiceFromHeader(*m_header, index)];
+    }
+
+    const std::string& AnnotationLog::LogEntry::operator[](uint32_t i) const
+    {
+        return m_values[i];
     }
 }
