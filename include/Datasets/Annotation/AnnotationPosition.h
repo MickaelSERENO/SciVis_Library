@@ -6,33 +6,33 @@
 #include <glm/glm.hpp>
 #include "Datasets/Annotation/AnnotationLog.h"
 
-
 namespace sereno
 {
     /** \brief  Represent a view from AnnotationLog to read positions. The positions CANNOT BE MODIFIED as this represents only a view*/
     class AnnotationPosition
     {
         public:
+            /** \brief  The iterator corresponding to the AnnotationPosition view */
             class AnnotationPositionIterator
             {
                 public:
                     //Iterator specifications
-                    typedef std::random_access_iterator_tag  iterator_category;
-                    typedef ptrdiff_t                        difference_type;
+                    typedef std::random_access_iterator_tag iterator_category; //Access wherever you want
+                    typedef ptrdiff_t                       difference_type;
                     typedef glm::vec3                       value_type;
                     typedef glm::vec3*                      pointer;
                     typedef glm::vec3&                      reference;
 
                     AnnotationPositionIterator(AnnotationLog* ann, const glm::ivec3& xyzInd, int32_t pos=0) : m_ann(ann), m_xyzInd(xyzInd), m_readPos(pos){readVal();}
 
-                    AnnotationPositionIterator& operator++()     {m_readPos++; readVal(); return *this;}
-                    AnnotationPositionIterator  operator++(int)  {AnnotationPositionIterator tmp(*this); ++(*this); return tmp;}
-                    AnnotationPositionIterator& operator--()     {m_readPos--; readVal(); return *this;}
-                    AnnotationPositionIterator  operator--(int)  {AnnotationPositionIterator tmp(*this); --(*this); return tmp;}
-                    AnnotationPositionIterator  operator+(int i) {return AnnotationPositionIterator(m_ann, m_xyzInd, m_readPos+i);}
-                    AnnotationPositionIterator  operator-(int i) {return AnnotationPositionIterator(m_ann, m_xyzInd, m_readPos-i);}
+                    AnnotationPositionIterator& operator++()      {m_readPos++; readVal(); return *this;}
+                    AnnotationPositionIterator  operator++(int)   {AnnotationPositionIterator tmp(*this); ++(*this); return tmp;}
+                    AnnotationPositionIterator& operator--()      {m_readPos--; readVal(); return *this;}
+                    AnnotationPositionIterator  operator--(int)   {AnnotationPositionIterator tmp(*this); --(*this); return tmp;}
 
+                    AnnotationPositionIterator  operator+(int i)  {return AnnotationPositionIterator(m_ann, m_xyzInd, m_readPos+i);}
                     AnnotationPositionIterator  operator+=(int i) {m_readPos+=i; readVal(); return *this;}
+                    AnnotationPositionIterator  operator-(int i)  {return AnnotationPositionIterator(m_ann, m_xyzInd, m_readPos-i);}
                     AnnotationPositionIterator  operator-=(int i) {m_readPos-=i; readVal(); return *this;}
 
                     const glm::vec3& operator*()   const {return m_pos;}
@@ -61,14 +61,32 @@ namespace sereno
                     glm::vec3      m_pos;
             };
         public:
+            /** \brief  Constructor
+             * \param ann the AnnotationLog to "view" on. The AnnotationPosition should not outlive ann.*/
             AnnotationPosition(AnnotationLog* ann) : m_ann(ann) {}
 
+            /** \brief  Set the x, y, and z column indices from the AnnotationLog to look upon. Negative values == we do not look at that component
+             *
+             * \param x the X values column indice
+             * \param y the Y values column indice
+             * \param z the Z values column indice */
             void setXYZIndices(int32_t x, int32_t y, int32_t z) {m_xInd = x; m_yInd = y, m_zInd = z;}
+
+            /** \brief  Set the x, y, and z column headers from the AnnotationLog to look upon. Header not found == we do not look at that component. See AnnotationLog::indiceFromHeader for more information
+             *
+             * \param x the X values column header title
+             * \param y the Y values column header title
+             * \param z the Z values column header title */
             void setXYZHeaders(const std::string& x, const std::string& y, const std::string& z) {m_xInd = m_ann->indiceFromHeader(x);
                                                                                                   m_yInd = m_ann->indiceFromHeader(y);
                                                                                                   m_zInd = m_ann->indiceFromHeader(z);}
 
+            /** \brief  Being iterator. The iterator values are constant. Modifying the XYZ indices while browsing the iterator has no effect. Values are given as glm::vec3 objects
+             * \return  the first position to look at */
             AnnotationPositionIterator begin() const {return AnnotationPositionIterator(m_ann, glm::ivec3(m_xInd, m_yInd, m_zInd));}
+
+            /** \brief  End iterator. The iterator values are constant
+             * \return  An invalid iterator corresponding to "end"*/
             AnnotationPositionIterator end()   const {return AnnotationPositionIterator(m_ann, glm::ivec3(m_xInd, m_yInd, m_zInd), -1);}
         private:
             AnnotationLog* m_ann;

@@ -117,4 +117,16 @@ namespace sereno
     {
         return m_values[i];
     }
+
+    std::vector<float> AnnotationLog::getTimeValues() const
+    {
+        std::vector<float> res;
+        if(m_timeIT < 0)
+            return res;
+
+        res.reserve(size());
+        for(const auto& it : *this)
+            res.push_back(std::stof(it[m_timeIT]));
+        return res;
+    }
 }

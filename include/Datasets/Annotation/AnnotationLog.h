@@ -99,7 +99,7 @@ namespace sereno
 
             /** \brief  The number of stored rows
              * \return  The number of rows */
-            uint32_t size() {return m_values.size();}
+            uint32_t size() const {return m_values.size();}
 
             /** \brief  Access the i-th row
              * \param i the row indice to look after
@@ -134,6 +134,10 @@ namespace sereno
             /** \brief  Get the column indice associated with time data
              * \return   -1 if no time is available, the indice corresponding to time data otherwise */
             int32_t getTimeColumn() const {return m_timeIT;}
+
+            /** \brief  Get the values corresponding to the "time" column, as defined by "setTimeColumn". The time column is parsed at each call, so it is better to save the results if needed
+             * \return  the values corresponding to the "time" column.*/
+            std::vector<float> getTimeValues() const;
 
             std::vector<LogEntry>::iterator begin() {return m_values.begin();}
             std::vector<LogEntry>::iterator end()   {return m_values.end();}
