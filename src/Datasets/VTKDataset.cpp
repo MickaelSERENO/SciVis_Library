@@ -153,8 +153,11 @@ namespace sereno
                                 if(getMask(k))
                                 {
                                     double readVal = readParsedVTKValue<double>(data + k*valueFormatInt, val->format);
-                                    minVal = (minVal < readVal ? minVal : readVal);
-                                    maxVal = (maxVal > readVal ? maxVal : readVal);
+                                    if(!std::isnan(readVal))
+                                    {
+                                        minVal = (minVal < readVal ? minVal : readVal);
+                                        maxVal = (maxVal > readVal ? maxVal : readVal);
+                                    }
                                 }
                             }
                         }
@@ -177,12 +180,16 @@ namespace sereno
                                     for(uint32_t j = 0; j < val->nbValuePerTuple; j++)
                                     {
                                         double readVal = readParsedVTKValue<double>(data + k*valueFormatInt*val->nbValuePerTuple + j*valueFormatInt, val->format);
+
+                                        if(std::isnan(readVal))
+                                            goto endNan;
                                         mag = readVal*readVal;
                                     }
                                     
                                     mag = sqrt(mag);
                                     minVal = fmin(minVal, mag);
                                     maxVal = fmax(maxVal, mag);
+endNan:;
                                 }
                             }
                         }
