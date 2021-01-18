@@ -59,6 +59,7 @@ namespace sereno
 
         m_timeIT  = 0;
         m_hasRead = true;
+        onParse();
 
         return true;
     }
@@ -91,6 +92,7 @@ namespace sereno
             else
                 m_timeIT = timeCol;
         }
+        onSetTimeColumn();
         return true;
     }
 
@@ -105,6 +107,7 @@ namespace sereno
             return false;
 
         m_timeIT = timeCol;
+        onSetTimeColumn();
         return true;
     }
 

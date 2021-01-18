@@ -45,9 +45,16 @@ namespace sereno
             return ANNOTATION_LOG_CONTAINER_ERROR_HEADER_ALREADY_PRESENT;
 
         m_positions.emplace(annot, new std::vector<glm::vec3>(annot->begin(), annot->end()));
+
+        it = m_assignedHeaders.begin();
         for(auto i : indices)
+        {
             if(i != -1)
-                m_assignedHeaders.insert(std::upper_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), i), i);
+            {
+                it = std::upper_bound(it, m_assignedHeaders.end(), i);
+                it = m_assignedHeaders.insert(it, i);
+            }
+        }
         
         return 0;
     }
@@ -71,5 +78,37 @@ namespace sereno
         }
 
         return res;
+    }
+
+    void AnnotationLogContainer::onParse()
+    {
+        readTimeValues();
+    }
+
+    void AnnotationLogContainer::onSetTimeColumn()
+    {
+        readTimeValues();
+    }
+
+    void AnnotationLogContainer::readTimeValues()
+    {
+        //Erase old header
+        if(m_curTimeHeader != -1)
+        {
+            auto it = std::lower_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), m_curTimeHeader);
+            if(it != m_assignedHeaders.end()) //THIS SHOULD ALWAYS BE TRUE
+                m_assignedHeaders.erase(it);
+        }
+
+        m_curTimeHeader = getTimeColumn();
+
+        if(m_curTimeHeader != -1)
+        {
+            auto it = std::upper_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), m_curTimeHeader);
+            it = m_assignedHeaders.insert(it, m_curTimeHeader);
+            m_time = getTimeValues();
+        }
+        else
+            m_time.clear();
     }
 }

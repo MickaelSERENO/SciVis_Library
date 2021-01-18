@@ -120,6 +120,9 @@ namespace sereno
              * \return   true if success, false otherwise. A message is printed in std::cerr in case of errors */
             bool readFromCSV(const std::string& path);
 
+            /** \brief  What to do once being parsed? */
+            virtual void onParse() {};
+
             /** \brief  Set the column indice where time is expected. Negative values == no expected time
              * \param timeCol the time column indice. Negatif values for no expected time
              * \return   return false in case of an invalid time column: No values were entered (and timeCol is positive), or timeCol is outside the number of columns of this annotation.  */
@@ -129,6 +132,9 @@ namespace sereno
              * \param timeHeader the header column corresponding to the time values. Must be a valid header (see hasHeader())
              * \return   return false in case of an invalid time header column*/
             bool setTimeColumn(const std::string& timeHeader);
+
+            /** \brief  What to do once the time column has been changed? */
+            virtual void onSetTimeColumn() {};
 
             /** \brief  Get the column indice associated with time data
              * \return   -1 if no time is available, the indice corresponding to time data otherwise */

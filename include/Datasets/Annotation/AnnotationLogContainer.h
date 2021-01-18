@@ -56,9 +56,23 @@ namespace sereno
             /** \brief  By elimination, provides a list of headers yet-to assign
              * \return    the headers yet-to assign */
             std::vector<uint32_t> getRemainingHeaders() const;
+
+            /** \brief  Get the stored time once parsed
+             * \return   the time */
+            const std::vector<float>& getParsedTime() const {return m_time;}
+
+            /** \brief  Get the stored time once parsed
+             * \return   the time */
+            std::vector<float>& getParsedTime() {return m_time;}
+
+            virtual void onParse();
+            virtual void onSetTimeColumn();
         private:
+            void readTimeValues();
             std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>*> m_positions;
             std::vector<uint32_t> m_assignedHeaders;
+            int32_t               m_curTimeHeader = -1;
+            std::vector<float>    m_time;
     };
 }
 
