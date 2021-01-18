@@ -40,8 +40,8 @@ namespace sereno
             //TODO copy that in a better way
             m_tf        = sd.m_tf;
 
-            for(auto& it : sd.m_annotations)
-                m_annotations.push_back(std::shared_ptr<Annotation>(new Annotation(*it.get())));
+            for(auto& it : sd.m_annotationsCanvas)
+                m_annotationsCanvas.push_back(std::shared_ptr<AnnotationCanvas>(new AnnotationCanvas(*it.get())));
 
             if(m_parent)
             {
@@ -60,29 +60,29 @@ namespace sereno
             free(m_volumetricMask);
     }
 
-    Annotation* SubDataset::emplaceAnnotation(uint32_t w, uint32_t h, float* position)
+    AnnotationCanvas* SubDataset::emplaceAnnotationCanvas(uint32_t w, uint32_t h, float* position)
     {
-        Annotation* annot = new Annotation(w, h, position);
-        m_annotations.push_back(std::shared_ptr<Annotation>(annot));
+        AnnotationCanvas* annot = new AnnotationCanvas(w, h, position);
+        m_annotationsCanvas.push_back(std::shared_ptr<AnnotationCanvas>(annot));
         return annot;
     }
 
-    void SubDataset::addAnnotation(std::shared_ptr<Annotation> annot)
+    void SubDataset::addAnnotationCanvas(std::shared_ptr<AnnotationCanvas> annot)
     {
-        m_annotations.push_back(annot);
+        m_annotationsCanvas.push_back(annot);
     }
 
-    bool SubDataset::removeAnnotation(std::shared_ptr<Annotation> annot)
+    bool SubDataset::removeAnnotationCanvas(std::shared_ptr<AnnotationCanvas> annot)
     {
-        for(std::list<std::shared_ptr<Annotation>>::const_iterator it = m_annotations.begin(); it != m_annotations.end(); it++)
+        for(std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator it = m_annotationsCanvas.begin(); it != m_annotationsCanvas.end(); it++)
             if((*it) == annot)
-                return removeAnnotation(it) != m_annotations.end();
+                return removeAnnotationCanvas(it) != m_annotationsCanvas.end();
         return false;
     }
 
-    std::list<std::shared_ptr<Annotation>>::const_iterator SubDataset::removeAnnotation(std::list<std::shared_ptr<Annotation>>::const_iterator it)
+    std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator SubDataset::removeAnnotationCanvas(std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator it)
     {
-        return m_annotations.erase(it);
+        return m_annotationsCanvas.erase(it);
     }
 
     size_t SubDataset::getVolumetricMaskSize() const 

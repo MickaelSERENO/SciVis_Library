@@ -15,7 +15,7 @@
 #include "Quaternion.h"
 #include "TransferFunction/TransferFunction.h"
 #include "ColorMode.h"
-#include "Datasets/Annotation/Annotation.h"
+#include "Datasets/Annotation/AnnotationCanvas.h"
 
 #ifdef SNAPSHOT
     #include "Datasets/Snapshot.h"
@@ -88,25 +88,25 @@ namespace sereno
              * \param pxHeight the height in pixels of the annotation
              * \param position the annotation's 3D position. Can be NULL (hence position = 0, 0, 0)
              * \return    the new created annotation. Do not delete/free it */
-            Annotation* emplaceAnnotation(uint32_t pxWidth, uint32_t pxHeight, float* position);
+            AnnotationCanvas* emplaceAnnotationCanvas(uint32_t pxWidth, uint32_t pxHeight, float* position);
 
             /* \brief  Add a new annotation. 
              * \param annot the new annotation to add. */
-            void addAnnotation(std::shared_ptr<Annotation> annot);
+            void addAnnotationCanvas(std::shared_ptr<AnnotationCanvas> annot);
 
             /* \brief Remove an annotation in the list
              * \param annot the annotation to remove 
              * \return true on success, false on error*/
-            bool removeAnnotation(std::shared_ptr<Annotation> annot);
+            bool removeAnnotationCanvas(std::shared_ptr<AnnotationCanvas> annot);
 
             /* \brief Remove an annotation in the list
              * \param it the iterator pointing to the annotation to remove
              * \return the next iterator in the list of the annotation (result of erase)*/
-            std::list<std::shared_ptr<Annotation>>::const_iterator removeAnnotation(std::list<std::shared_ptr<Annotation>>::const_iterator it);
+            std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator removeAnnotationCanvas(std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator it);
 
             /* \brief  Get the registered annotations
              * \return  the registered annotations bound to this SubDataset */
-            const std::list<std::shared_ptr<Annotation>>& getAnnotations() const {return m_annotations;}
+            const std::list<std::shared_ptr<AnnotationCanvas>>& getAnnotationCanvas() const {return m_annotationsCanvas;}
 
 #ifdef SNAPSHOT
             /**
@@ -195,7 +195,7 @@ namespace sereno
             std::string m_name;                                /*!< The SubDataset name*/
             std::shared_ptr<TF> m_tf       = NULL;                     /*!< The transfer function in application*/
             uint32_t    m_id       = 1;                        /*!< The SubDataset ID*/
-            std::list<std::shared_ptr<Annotation>> m_annotations; /*!< The SubDataset Annotation*/
+            std::list<std::shared_ptr<AnnotationCanvas>> m_annotationsCanvas; /*!< The SubDataset AnnotationCanvas*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/

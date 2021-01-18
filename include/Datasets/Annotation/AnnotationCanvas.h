@@ -1,5 +1,5 @@
-#ifndef  ANNOTATION_INC
-#define  ANNOTATION_INC
+#ifndef  ANNOTATIONCANVAS_INC
+#define  ANNOTATIONCANVAS_INC
 
 #include <list>
 #include <memory>
@@ -9,26 +9,26 @@
 namespace sereno
 {
     /** \brief  Annotation class, contains information about annotations */
-    class Annotation
+    class AnnotationCanvas
     {
         public:
             /* \brief  Constructor
              * \param pxWidth the width in pixels of the annotation
              * \param pxHeight the height in pixels of the annotation
              * \param position the annotation's 3D position. If NULL, position = (0, 0, 0) */
-            Annotation(uint32_t pxWidth, uint32_t pxHeight, float* position);
+            AnnotationCanvas(uint32_t pxWidth, uint32_t pxHeight, float* position);
 
             /* \brief  Copy constructor
              * \param annot the annotation to copy */
-            Annotation(const Annotation& annot);
+            AnnotationCanvas(const AnnotationCanvas& annot);
 
             /* \brief  Assignment operator
              * \param annot the annotation to copy
              * \return   reference to the current object */
-            Annotation& operator=(const Annotation& annot);
+            AnnotationCanvas& operator=(const AnnotationCanvas& annot);
 
             /** \brief  Destructor. */
-            virtual ~Annotation(){}
+            virtual ~AnnotationCanvas(){}
 
             /* \brief Get the 3D Annotation's position 
              * \return   A pointer to a float array (size=3) containing the 3D position information (x, y, z)*/
