@@ -68,7 +68,7 @@ namespace sereno
 
                     /** \brief Access the string value at index "i". 
                      * \param i the column position to look after
-                     * \return a reference string value corresponding at the position "i" in the row*/
+              {       * \return a reference string value corresponding at the position "i" in the row*/
                     std::string& operator[](uint32_t i) {return const_cast<std::string&>(std::as_const(*this)[i]);}
 
                     std::vector<std::string>::iterator begin() {return m_values.begin();}
@@ -82,7 +82,6 @@ namespace sereno
             };
         public:
             /** \brief  Initialize the Log reading
-             *
              * \param header should we expect a header when reading data?  */
             AnnotationLog(bool header=true);
 

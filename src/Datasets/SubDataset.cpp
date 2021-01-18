@@ -40,8 +40,8 @@ namespace sereno
             //TODO copy that in a better way
             m_tf        = sd.m_tf;
 
-            for(auto& it : sd.m_annotationsCanvas)
-                m_annotationsCanvas.push_back(std::shared_ptr<AnnotationCanvas>(new AnnotationCanvas(*it.get())));
+            for(auto& it : sd.m_annotationCanvases)
+                m_annotationCanvases.push_back(std::shared_ptr<AnnotationCanvas>(new AnnotationCanvas(*it.get())));
 
             if(m_parent)
             {
@@ -63,26 +63,26 @@ namespace sereno
     AnnotationCanvas* SubDataset::emplaceAnnotationCanvas(uint32_t w, uint32_t h, float* position)
     {
         AnnotationCanvas* annot = new AnnotationCanvas(w, h, position);
-        m_annotationsCanvas.push_back(std::shared_ptr<AnnotationCanvas>(annot));
+        m_annotationCanvases.push_back(std::shared_ptr<AnnotationCanvas>(annot));
         return annot;
     }
 
     void SubDataset::addAnnotationCanvas(std::shared_ptr<AnnotationCanvas> annot)
     {
-        m_annotationsCanvas.push_back(annot);
+        m_annotationCanvases.push_back(annot);
     }
 
     bool SubDataset::removeAnnotationCanvas(std::shared_ptr<AnnotationCanvas> annot)
     {
-        for(std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator it = m_annotationsCanvas.begin(); it != m_annotationsCanvas.end(); it++)
+        for(std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator it = m_annotationCanvases.begin(); it != m_annotationCanvases.end(); it++)
             if((*it) == annot)
-                return removeAnnotationCanvas(it) != m_annotationsCanvas.end();
+                return removeAnnotationCanvas(it) != m_annotationCanvases.end();
         return false;
     }
 
     std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator SubDataset::removeAnnotationCanvas(std::list<std::shared_ptr<AnnotationCanvas>>::const_iterator it)
     {
-        return m_annotationsCanvas.erase(it);
+        return m_annotationCanvases.erase(it);
     }
 
     size_t SubDataset::getVolumetricMaskSize() const 
