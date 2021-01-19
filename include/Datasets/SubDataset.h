@@ -93,7 +93,7 @@ namespace sereno
 
             /* \brief  Add a new annotation based on logged information 
              * \param annot the new annotation to add. */
-            void addAnnotationLog(std::shared_ptr<AnnotationLog> annot);
+            void addAnnotationLog(std::shared_ptr<AnnotationLogContainer> annot) {m_annotationLogs.push_back(annot);}
 
             /* \brief  Add a new canvas annotation. 
              * \param annot the new annotation to add. */
@@ -107,11 +107,19 @@ namespace sereno
             /* \brief Remove an annotation in the list
              * \param it the iterator pointing to the annotation to remove
              * \return the next iterator in the list of the annotation (result of erase)*/
-            std::list<std::shared_ptr<AnnotationLog>>::const_iterator removeAnnotationLog(std::list<std::shared_ptr<AnnotationLog>>::const_iterator it);
+            std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator removeAnnotationLog(std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator it)
+            {
+                auto it = m_annotationLogs.find(it); 
+                return (it != m_annotationLogs.end() ? m_annotationLogs.erase(it) : m_annotationLogs.end());
+            }
 
             /* \brief  Get the registered log annotations
              * \return  the registered annotations bound to this SubDataset */
-            const std::list<std::shared_ptr<AnnotationLog>>& getAnnotationLog() const {return m_annotationLogs;}
+            const std::list<std::shared_ptr<AnnotationLogContainer>>& getAnnotationLog() const {return m_annotationLogs;}
+
+            /* \brief  Get the registered log annotations
+             * \return  the registered annotations bound to this SubDataset */
+            std::list<std::shared_ptr<AnnotationLogContainer>>& getAnnotationLog() {return m_annotationLogs;}
 
             /* \brief Remove an annotation in the list
              * \param it the iterator pointing to the annotation to remove
@@ -209,8 +217,8 @@ namespace sereno
             std::string m_name;                                /*!< The SubDataset name*/
             std::shared_ptr<TF> m_tf       = NULL;                     /*!< The transfer function in application*/
             uint32_t    m_id       = 1;                        /*!< The SubDataset ID*/
-            std::list<std::shared_ptr<AnnotationCanvas>> m_annotationCanvases; /*!< The SubDataset's AnnotationCanvas*/
-            std::list<std::shared_ptr<AnnotationLog>>    m_annotationLogs;     /*!< The SubDataset's AnnotationLog*/
+            std::list<std::shared_ptr<AnnotationCanvas>>       m_annotationCanvases; /*!< The SubDataset's AnnotationCanvas*/
+            std::list<std::shared_ptr<AnnotationLogContainer>> m_annotationLogs;     /*!< The SubDataset's AnnotationLog*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/
