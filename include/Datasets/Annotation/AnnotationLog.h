@@ -144,6 +144,10 @@ namespace sereno
              * \return   -1 if no time is available, the indice corresponding to time data otherwise */
             int32_t getTimeColumn() const {return m_timeIT;}
 
+            /** \brief  Get the headers associated with this CSV.
+             * \return  The headers associated with this CSV */
+            const std::vector<std::string>& getHeaders() const {return m_header;}
+
             /** \brief  Get the values corresponding to the "time" column, as defined by "setTimeColumn". The time column is parsed at each call, so it is better to save the results if needed
              * \return  the values corresponding to the "time" column.*/
             std::vector<float> getTimeValues() const;
