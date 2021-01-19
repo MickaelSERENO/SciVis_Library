@@ -17,6 +17,12 @@ namespace sereno
     AnnotationLog::~AnnotationLog() 
     {}
 
+    uint32_t AnnotationLog::getNbColumns() const
+    {
+        //Works because we are in a "data frame", i.e., rectangular data (each row possesses the same number of columns. This is checked at parsing)
+        return (m_values.size() ? m_values[0].size() : 0);
+    }
+
     bool AnnotationLog::readFromCSV(const std::string& path)
     {
         std::ifstream file(path);

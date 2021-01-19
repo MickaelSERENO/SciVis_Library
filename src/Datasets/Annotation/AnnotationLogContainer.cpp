@@ -70,9 +70,10 @@ namespace sereno
     std::vector<uint32_t> AnnotationLogContainer::getRemainingHeaders() const
     {
         std::vector<uint32_t> res;
+        uint32_t nbColumns = getNbColumns();
         for(uint32_t i = 0, j = 0; i < size(); i++)
         {
-            for(; i < size() && i != m_assignedHeaders[j]; i++)
+            for(; i < nbColumns && i != m_assignedHeaders[j]; i++)
                 res.push_back(i);
             j++;
         }

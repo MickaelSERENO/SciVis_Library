@@ -1,15 +1,13 @@
 #ifndef  ANNOTATIONPOSITION_INC
 #define  ANNOTATIONPOSITION_INC
 
-#define GLM_FORCE_RADIANS
-
-#include <glm/glm.hpp>
 #include "Datasets/Annotation/AnnotationLog.h"
+#include "Datasets/Annotation/AnnotationLogComponent.h"
 
 namespace sereno
 {
     /** \brief  Represent a view from AnnotationLog to read positions. The positions CANNOT BE MODIFIED as this represents only a view*/
-    class AnnotationPosition
+    class AnnotationPosition : public AnnotationLogComponent
     {
         public:
             /** \brief  The iterator corresponding to the AnnotationPosition view */
@@ -94,7 +92,7 @@ namespace sereno
         public:
             /** \brief  Constructor
              * \param ann the AnnotationLog to "view" on. The AnnotationPosition should not outlive ann.*/
-            AnnotationPosition(const AnnotationLog* ann) : m_ann(ann) {}
+            AnnotationPosition(const AnnotationLog* ann) : AnnotationLogComponent(ann) {}
 
             /** \brief  Set the x, y, and z column indices from the AnnotationLog to look upon. Negative values == we do not look at that component
              *
@@ -128,14 +126,19 @@ namespace sereno
              * \return  the parameter 'indices' */
             int32_t* getPosIndices(int32_t* indices) const {indices[0] = m_xInd; indices[1] = m_yInd; indices[2] = m_zInd; return indices;}
 
-            /** \brief  Get the annotation log being read
-             * \return the annotation log */
-            const AnnotationLog* getAnnotationLog() const {return m_ann;}
+            /** \brief  Set the color that should represent this annotation position
+             * \param color the new color to consider (R, G, B, A). Each component should range from 0.0 to 1.0 */
+            void setColor(const glm::vec4& color) {m_color = color;}
+
+            /** \brief  Get the color that should represent this annotation position
+             * \return the color to consider (R, G, B, A). Each component should range from 0.0 to 1.0 */
+            const glm::vec4& getColor() const {return m_color;}
         private:
-            const AnnotationLog* m_ann;
             int32_t m_xInd = -1;
             int32_t m_yInd = -1;
             int32_t m_zInd = -1;
+
+            glm::vec4 m_color = glm::vec4(1.0, 1.0, 1.0, 1.0);
     };
 }
 

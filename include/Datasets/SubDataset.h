@@ -16,7 +16,7 @@
 #include "TransferFunction/TransferFunction.h"
 #include "ColorMode.h"
 #include "Datasets/Annotation/AnnotationCanvas.h"
-#include "Datasets/Annotation/AnnotationLog.h"
+#include "Datasets/Annotation/AnnotationLogContainer.h"
 
 #ifdef SNAPSHOT
     #include "Datasets/Snapshot.h"
@@ -107,11 +107,7 @@ namespace sereno
             /* \brief Remove an annotation in the list
              * \param it the iterator pointing to the annotation to remove
              * \return the next iterator in the list of the annotation (result of erase)*/
-            std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator removeAnnotationLog(std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator it)
-            {
-                auto it = m_annotationLogs.find(it); 
-                return (it != m_annotationLogs.end() ? m_annotationLogs.erase(it) : m_annotationLogs.end());
-            }
+            std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator removeAnnotationLog(std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator it) { return m_annotationLogs.erase(it); }
 
             /* \brief  Get the registered log annotations
              * \return  the registered annotations bound to this SubDataset */

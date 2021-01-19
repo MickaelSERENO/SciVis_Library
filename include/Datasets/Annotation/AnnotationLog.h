@@ -100,6 +100,9 @@ namespace sereno
              * \return  The number of rows */
             uint32_t size() const {return m_values.size();}
 
+            /** \brief  What to do once the time column has been changed? */
+            virtual void onSetTimeColumn() {};
+
             /** \brief  Access the i-th row
              * \param i the row indice to look after
              * \return   a const reference to a LogEntry representing the i-th row*/
@@ -133,8 +136,9 @@ namespace sereno
              * \return   return false in case of an invalid time header column*/
             bool setTimeColumn(const std::string& timeHeader);
 
-            /** \brief  What to do once the time column has been changed? */
-            virtual void onSetTimeColumn() {};
+            /** \brief  Get the number of stored column. If there is no stored values, return 0.
+             * \return   The number of stored column.*/
+            uint32_t getNbColumns() const;
 
             /** \brief  Get the column indice associated with time data
              * \return   -1 if no time is available, the indice corresponding to time data otherwise */
