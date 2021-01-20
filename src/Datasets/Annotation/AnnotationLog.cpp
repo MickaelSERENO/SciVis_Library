@@ -1,5 +1,6 @@
 #include "Datasets/Annotation/AnnotationLog.h"
 #include <fstream>
+#include <cstdlib>
 
 namespace sereno
 {
@@ -135,7 +136,7 @@ namespace sereno
 
         res.reserve(size());
         for(const auto& it : *this)
-            res.push_back(std::stof(it[m_timeIT]));
+            res.push_back(atof(it[m_timeIT].c_str()));
         return res;
     }
 }
