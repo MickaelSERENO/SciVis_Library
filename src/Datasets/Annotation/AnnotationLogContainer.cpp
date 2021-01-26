@@ -6,7 +6,7 @@ namespace sereno
     AnnotationLogContainer::~AnnotationLogContainer()
     {
         for(auto it : m_positions)
-            delete it.second;
+            it.first->removeListener(this);
     }
 
     std::shared_ptr<AnnotationPosition> AnnotationLogContainer::buildAnnotationPositionView() const 
@@ -44,7 +44,7 @@ namespace sereno
         if(found)
             return ANNOTATION_LOG_CONTAINER_ERROR_HEADER_ALREADY_PRESENT;
 
-        m_positions.emplace(annot, new std::vector<glm::vec3>(annot->begin(), annot->end()));
+        m_positions.emplace(annot, std::vector<glm::vec3>(annot->begin(), annot->end()));
 
         it = m_assignedHeaders.begin();
         for(auto i : indices)
@@ -56,6 +56,7 @@ namespace sereno
             }
         }
         
+        annot->addListener(this);
         return 0;
     }
 
@@ -63,7 +64,7 @@ namespace sereno
     {
         auto it = m_positions.find(annot);
         if(it != m_positions.end())
-            return it->second;
+            return &it->second;
         return NULL;
     }
 
@@ -111,5 +112,62 @@ namespace sereno
         }
         else
             m_time.clear();
+    }
+
+    void AnnotationLogContainer::onUpdateHeaders(AnnotationLogComponent* component, const std::vector<int32_t>& oldHeaders)
+    {
+        bool changeHeaders = false;
+
+        //Erase the headers as assigned
+        for(auto h : oldHeaders)
+        {
+            for(auto it = m_assignedHeaders.begin(); it != m_assignedHeaders.end();)
+            {
+                if(*it == (uint32_t)h)
+                {
+                    it = m_assignedHeaders.erase(it);
+                    break;
+                }
+                it++;
+            }
+        }
+
+        //Add the assigned headers. Set as "-1" if the header is already taken
+        std::vector<int32_t> currentHeaders = component->getHeaders();
+        for(auto& it : currentHeaders)
+        {
+            if(it != -1)
+            {
+                auto oldVal = it;
+                //If found: set header as -1
+                if(std::binary_search(m_assignedHeaders.begin(), m_assignedHeaders.end(), it))
+                {
+                    it            = -1;
+                    changeHeaders = true;
+                }
+
+                //We can "still" add it (even if, for the moment, it exists twice), because this function shall be called twice
+                auto insertIT = std::upper_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), oldVal);
+                m_assignedHeaders.insert(insertIT, oldVal);
+            }
+        }
+
+        //Update internal data. Rechange the headers if required (then stop this function)
+        for(auto& it : m_positions)
+        {
+            if(it.first.get() == component)
+            {
+                if(changeHeaders)
+                {
+                    it.first->setXYZIndices(currentHeaders[0], currentHeaders[1], currentHeaders[2]);
+                    return; //This method shall be called again due to the setXYZIndices
+                }
+                else
+                {
+                    it.second.assign(it.first->begin(), it.first->end());
+                    return;
+                }
+            }
+        }
     }
 }

@@ -64,7 +64,7 @@ namespace sereno
             m_values.emplace_back(std::move(it.getData()), (m_hasHeader?&m_header:NULL));
         }
 
-        m_timeIT  = 0;
+        m_timeIT  = -1;
         m_hasRead = true;
         onParse();
 

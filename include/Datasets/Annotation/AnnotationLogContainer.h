@@ -15,7 +15,7 @@
 namespace sereno
 {
     /** \brief  A container of annotation log information */
-    class AnnotationLogContainer : public AnnotationLog
+    class AnnotationLogContainer : public AnnotationLog, public AnnotationLogComponentListener
     {
         public:
             /** \brief  Initialize the Log reading
@@ -27,7 +27,7 @@ namespace sereno
 
             /** \brief  Build an annotation positional view based on this Annotation Log. The returned values can then be parameterized and be sent to "parseAnnotationPosition" function for storing and reading its values.
              *
-             * \return  An AnnotationPosition that can be configured and then read in "parseAnnotationPosition" function. */
+             * \return  An AnnotationPosition that can be configured and then read in "parseAnnotationPosition" function.*/
             std::shared_ptr<AnnotationPosition> buildAnnotationPositionView() const;
 
             /** \brief parse an annotation position configured with "this" set as the annotation log
@@ -37,7 +37,7 @@ namespace sereno
 
             /** \brief  Get a map of all the registered annotation position and the associated read position.
              * \return   all the parsed annotation positions and the corresponding positions*/
-            const std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>*>& getAnnotationPositions() const {return m_positions;}
+            const std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>>& getAnnotationPositions() const {return m_positions;}
 
             /** \brief  Get the positions to use from an AnnotationPosition view.
              * \param annot the view to look after
@@ -67,9 +67,10 @@ namespace sereno
 
             virtual void onParse();
             virtual void onSetTimeColumn();
+            virtual void onUpdateHeaders(AnnotationLogComponent* component, const std::vector<int32_t>& oldHeaders);
         private:
             void readTimeValues();
-            std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>*> m_positions;
+            std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>> m_positions;
             std::vector<uint32_t> m_assignedHeaders;
             int32_t               m_curTimeHeader = -1;
             std::vector<float>    m_time;

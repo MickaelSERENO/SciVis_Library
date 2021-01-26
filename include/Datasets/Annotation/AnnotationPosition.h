@@ -57,7 +57,16 @@ namespace sereno
                     AnnotationPositionIterator  operator-(int i)  {return AnnotationPositionIterator(m_ann, m_xyzInd, m_readPos-i);}
                     AnnotationPositionIterator& operator-=(int i) {m_readPos-=i; readVal(); return *this;}
 
-                    int                         operator- (const AnnotationPositionIterator& i)  {return m_readPos-i.m_readPos;}
+                    int                         operator- (const AnnotationPositionIterator& i)  
+                    {
+                        if(m_readPos != -1 && i.m_readPos != -1)
+                            return m_readPos-i.m_readPos;
+                        else if(m_readPos != -1)
+                            return m_readPos - m_ann->size();
+                        else if(i.m_readPos != -1)
+                            return m_ann->size() - i.m_readPos;
+                        return 0;
+                    }
 
                     const glm::vec3& operator*()   const {return m_pos;}
                     const glm::vec3* operator->()  const {return &m_pos;}
@@ -69,10 +78,10 @@ namespace sereno
 
                     bool operator!=(const AnnotationPositionIterator& it) {return !((*this)==it);}
 
-                    inline bool operator>(const  AnnotationPositionIterator& rhs) {return m_readPos >  rhs.m_readPos;}
-                    inline bool operator<(const  AnnotationPositionIterator& rhs) {return m_readPos <  rhs.m_readPos;}
-                    inline bool operator>=(const AnnotationPositionIterator& rhs) {return m_readPos >= rhs.m_readPos;}
-                    inline bool operator<=(const AnnotationPositionIterator& rhs) {return m_readPos <= rhs.m_readPos;}
+                    inline bool operator>(const  AnnotationPositionIterator& rhs) {return (uint32_t)m_readPos >  (uint32_t)rhs.m_readPos;}
+                    inline bool operator<(const  AnnotationPositionIterator& rhs) {return (uint32_t)m_readPos <  (uint32_t)rhs.m_readPos;}
+                    inline bool operator>=(const AnnotationPositionIterator& rhs) {return (uint32_t)m_readPos >= (uint32_t)rhs.m_readPos;}
+                    inline bool operator<=(const AnnotationPositionIterator& rhs) {return (uint32_t)m_readPos <= (uint32_t)rhs.m_readPos;}
                 private:
                     void readVal() 
                     {
@@ -99,18 +108,28 @@ namespace sereno
              * \param x the X values column indice
              * \param y the Y values column indice
              * \param z the Z values column indice */
-            void setXYZIndices(int32_t x, int32_t y, int32_t z) {m_xInd = (x < (int32_t)m_ann->size() ? x : -1); 
-                                                                 m_yInd = (y < (int32_t)m_ann->size() ? y : -1);
-                                                                 m_zInd = (z < (int32_t)m_ann->size() ? z : -1);}
+            void setXYZIndices(int32_t x, int32_t y, int32_t z) 
+            {
+                auto h = getHeaders();
+                m_xInd = (x < (int32_t)m_ann->size() ? x : -1); 
+                m_yInd = (y < (int32_t)m_ann->size() ? y : -1);
+                m_zInd = (z < (int32_t)m_ann->size() ? z : -1);
+                callOnUpdateHeaders(h);
+            }
 
             /** \brief  Set the x, y, and z column headers from the AnnotationLog to look upon. Header not found == we do not look at that component. See AnnotationLog::indiceFromHeader for more information
              *
              * \param x the X values column header title
              * \param y the Y values column header title
              * \param z the Z values column header title */
-            void setXYZHeaders(const std::string& x, const std::string& y, const std::string& z) {m_xInd = m_ann->indiceFromHeader(x);
-                                                                                                  m_yInd = m_ann->indiceFromHeader(y);
-                                                                                                  m_zInd = m_ann->indiceFromHeader(z);}
+            void setXYZHeaders(const std::string& x, const std::string& y, const std::string& z) 
+            {
+                auto h = getHeaders();
+                m_xInd = m_ann->indiceFromHeader(x);
+                m_yInd = m_ann->indiceFromHeader(y);
+                m_zInd = m_ann->indiceFromHeader(z);
+                callOnUpdateHeaders(h);
+            }
 
             /** \brief  Being iterator. The iterator values are constant. Modifying the XYZ indices while browsing the iterator has no effect. Values are given as glm::vec3 objects
              * \return  the first position to look at */
@@ -133,6 +152,10 @@ namespace sereno
             /** \brief  Get the color that should represent this annotation position
              * \return the color to consider (R, G, B, A). Each component should range from 0.0 to 1.0 */
             const glm::vec4& getColor() const {return m_color;}
+
+            /** \brief Does the same thing as getPosIndices, but return a std::vector for compatibility with motherclass
+             * \return the X, Y, and Z headers */
+            virtual std::vector<int32_t> getHeaders() const {return {m_xInd, m_yInd, m_zInd};}
         private:
             int32_t m_xInd = -1;
             int32_t m_yInd = -1;
