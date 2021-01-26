@@ -72,12 +72,17 @@ namespace sereno
     {
         std::vector<uint32_t> res;
         uint32_t nbColumns = getNbColumns();
-        for(uint32_t i = 0, j = 0; i < size(); i++)
+        res.reserve(nbColumns);
+        uint32_t i = 0;
+
+        for(uint32_t j = 0; i < nbColumns && j < m_assignedHeaders.size(); i++, j++)
         {
-            for(; i < nbColumns && i != m_assignedHeaders[j]; i++)
+            for(; i < nbColumns && i != m_assignedHeaders[j]; i++) //This works because every list is ordered
                 res.push_back(i);
-            j++;
         }
+
+        for(; i < nbColumns; i++)
+            res.push_back(i);
 
         return res;
     }
