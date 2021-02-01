@@ -17,6 +17,7 @@
 #include "ColorMode.h"
 #include "Datasets/Annotation/AnnotationCanvas.h"
 #include "Datasets/Annotation/AnnotationLogContainer.h"
+#include "Datasets/Annotation/DrawableAnnotationPosition.h"
 
 #ifdef SNAPSHOT
     #include "Datasets/Snapshot.h"
@@ -93,7 +94,7 @@ namespace sereno
 
             /* \brief  Add a new annotation based on logged information 
              * \param annot the new annotation to add. */
-            void addAnnotationLog(std::shared_ptr<AnnotationLogContainer> annot) {m_annotationLogs.push_back(annot);}
+            void addDrawableAnnotationPosition(std::shared_ptr<DrawableAnnotationPosition> annot) {m_annotationPositions.push_back(annot);}
 
             /* \brief  Add a new canvas annotation. 
              * \param annot the new annotation to add. */
@@ -107,15 +108,15 @@ namespace sereno
             /* \brief Remove an annotation in the list
              * \param it the iterator pointing to the annotation to remove
              * \return the next iterator in the list of the annotation (result of erase)*/
-            std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator removeAnnotationLog(std::list<std::shared_ptr<AnnotationLogContainer>>::const_iterator it) { return m_annotationLogs.erase(it); }
+            std::list<std::shared_ptr<DrawableAnnotationPosition>>::const_iterator removeDrawableAnnotationPosition(std::list<std::shared_ptr<DrawableAnnotationPosition>>::const_iterator it) { return m_annotationPositions.erase(it); }
 
-            /* \brief  Get the registered log annotations
+            /* \brief  Get the registered annotation positional informations
              * \return  the registered annotations bound to this SubDataset */
-            const std::list<std::shared_ptr<AnnotationLogContainer>>& getAnnotationLog() const {return m_annotationLogs;}
+            const std::list<std::shared_ptr<DrawableAnnotationPosition>>& getDrawableAnnotationPositions() const {return m_annotationPositions;}
 
-            /* \brief  Get the registered log annotations
+            /* \brief  Get the registered annotation positional information
              * \return  the registered annotations bound to this SubDataset */
-            std::list<std::shared_ptr<AnnotationLogContainer>>& getAnnotationLog() {return m_annotationLogs;}
+            std::list<std::shared_ptr<DrawableAnnotationPosition>>& getDrawableAnnotationPositions() {return m_annotationPositions;}
 
             /* \brief Remove an annotation in the list
              * \param it the iterator pointing to the annotation to remove
@@ -213,8 +214,8 @@ namespace sereno
             std::string m_name;                                /*!< The SubDataset name*/
             std::shared_ptr<TF> m_tf       = NULL;                     /*!< The transfer function in application*/
             uint32_t    m_id       = 1;                        /*!< The SubDataset ID*/
-            std::list<std::shared_ptr<AnnotationCanvas>>       m_annotationCanvases; /*!< The SubDataset's AnnotationCanvas*/
-            std::list<std::shared_ptr<AnnotationLogContainer>> m_annotationLogs;     /*!< The SubDataset's AnnotationLog*/
+            std::list<std::shared_ptr<AnnotationCanvas>>           m_annotationCanvases;  /*!< The SubDataset's AnnotationCanvas*/
+            std::list<std::shared_ptr<DrawableAnnotationPosition>> m_annotationPositions; /*!< The SubDataset's AnnotationLog*/
 
 #ifdef SNAPSHOT
             std::shared_ptr<Snapshot> m_snapshot; /*!< The snapshot structure*/

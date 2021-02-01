@@ -41,14 +41,6 @@ namespace sereno
              * \return   true if this listener was already added. Otherwise, the function returns false and nothing is done*/
             bool removeListener(AnnotationLogComponentListener* l);
 
-            /** \brief  Should we consider the time component?
-             * \param s true if yes, false otherwise */
-            void setEnableTime(bool s) {m_enableTime = s;}
-
-            /** \brief  Should we consider the time component?
-             * \return true if yes, false otherwise */
-            bool getEnableTime() const {return m_enableTime;}
-
             /** \brief  Get the annotation log being read
              * \return the annotation log */
             const AnnotationLog* getAnnotationLog() const {return m_ann;}
@@ -64,7 +56,6 @@ namespace sereno
             }
             std::list<AnnotationLogComponentListener*> m_listeners;
             const AnnotationLog*                       m_ann;
-            bool                                       m_enableTime = true;
     };
 }
 

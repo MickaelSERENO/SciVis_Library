@@ -43,6 +43,9 @@ namespace sereno
             for(auto& it : sd.m_annotationCanvases)
                 m_annotationCanvases.push_back(std::shared_ptr<AnnotationCanvas>(new AnnotationCanvas(*it.get())));
 
+            for(auto& it : sd.m_annotationPositions)
+                m_annotationPositions.push_back(std::shared_ptr<DrawableAnnotationPosition>(new DrawableAnnotationPosition(*it.get())));
+
             if(m_parent)
             {
                 size_t nbData = sizeof(uint8_t)*(m_parent->getNbSpatialData()+7)/8;

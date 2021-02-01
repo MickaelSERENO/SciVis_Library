@@ -145,14 +145,6 @@ namespace sereno
              * \return  the parameter 'indices' */
             int32_t* getPosIndices(int32_t* indices) const {indices[0] = m_xInd; indices[1] = m_yInd; indices[2] = m_zInd; return indices;}
 
-            /** \brief  Set the color that should represent this annotation position
-             * \param color the new color to consider (R, G, B, A). Each component should range from 0.0 to 1.0 */
-            void setColor(const glm::vec4& color) {m_color = color;}
-
-            /** \brief  Get the color that should represent this annotation position
-             * \return the color to consider (R, G, B, A). Each component should range from 0.0 to 1.0 */
-            const glm::vec4& getColor() const {return m_color;}
-
             /** \brief Does the same thing as getPosIndices, but return a std::vector for compatibility with motherclass
              * \return the X, Y, and Z headers */
             virtual std::vector<int32_t> getHeaders() const {return {m_xInd, m_yInd, m_zInd};}
@@ -160,8 +152,6 @@ namespace sereno
             int32_t m_xInd = -1;
             int32_t m_yInd = -1;
             int32_t m_zInd = -1;
-
-            glm::vec4 m_color = glm::vec4(1.0, 1.0, 1.0, 1.0);
     };
 }
 
