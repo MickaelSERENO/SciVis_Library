@@ -111,9 +111,9 @@ namespace sereno
             void setXYZIndices(int32_t x, int32_t y, int32_t z) 
             {
                 auto h = getHeaders();
-                m_xInd = (x < (int32_t)m_ann->size() ? x : -1); 
-                m_yInd = (y < (int32_t)m_ann->size() ? y : -1);
-                m_zInd = (z < (int32_t)m_ann->size() ? z : -1);
+                m_xInd = (x < (int32_t)m_ann->getNbColumns() ? x : -1); 
+                m_yInd = (y < (int32_t)m_ann->getNbColumns() ? y : -1);
+                m_zInd = (z < (int32_t)m_ann->getNbColumns() ? z : -1);
                 callOnUpdateHeaders(h);
             }
 

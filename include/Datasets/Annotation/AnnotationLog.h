@@ -100,9 +100,6 @@ namespace sereno
              * \return  The number of rows */
             uint32_t size() const {return m_values.size();}
 
-            /** \brief  What to do once the time column has been changed? */
-            virtual void onSetTimeColumn() {};
-
             /** \brief  Access the i-th row
              * \param i the row indice to look after
              * \return   a const reference to a LogEntry representing the i-th row*/
@@ -129,12 +126,12 @@ namespace sereno
             /** \brief  Set the column indice where time is expected. Negative values == no expected time
              * \param timeCol the time column indice. Negatif values for no expected time
              * \return   return false in case of an invalid time column: No values were entered (and timeCol is positive), or timeCol is outside the number of columns of this annotation.  */
-            bool setTimeColumn(int32_t timeCol);
+            virtual bool setTimeInd(int32_t timeCol);
 
             /** \brief  Set the column indice where time is expected.
              * \param timeHeader the header column corresponding to the time values. Must be a valid header (see hasHeader())
              * \return   return false in case of an invalid time header column*/
-            bool setTimeColumn(const std::string& timeHeader);
+            virtual bool setTimeHeader(const std::string& timeHeader);
 
             /** \brief  Get the number of stored column. If there is no stored values, return 0.
              * \return   The number of stored column.*/
@@ -148,7 +145,7 @@ namespace sereno
              * \return  The headers associated with this CSV */
             const std::vector<std::string>& getHeaders() const {return m_header;}
 
-            /** \brief  Get the values corresponding to the "time" column, as defined by "setTimeColumn". The time column is parsed at each call, so it is better to save the results if needed
+            /** \brief  Get the values corresponding to the "time" column, as defined by "setTimeInd". The time column is parsed at each call, so it is better to save the results if needed
              * \return  the values corresponding to the "time" column.*/
             std::vector<float> getTimeValues() const;
 
@@ -157,7 +154,7 @@ namespace sereno
 
             std::vector<LogEntry>::const_iterator begin() const {return m_values.begin();}
             std::vector<LogEntry>::const_iterator end()   const {return m_values.end();}
-        private:
+        protected:
             bool m_hasHeader;
             bool m_hasRead = false;
             std::vector<std::string> m_header;

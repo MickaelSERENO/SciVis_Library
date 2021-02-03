@@ -71,7 +71,7 @@ namespace sereno
         return true;
     }
 
-    bool AnnotationLog::setTimeColumn(int32_t timeCol)
+    bool AnnotationLog::setTimeInd(int32_t timeCol)
     {
         if(timeCol < 0)
         {
@@ -99,11 +99,10 @@ namespace sereno
             else
                 m_timeIT = timeCol;
         }
-        onSetTimeColumn();
         return true;
     }
 
-    bool AnnotationLog::setTimeColumn(const std::string& timeHeader)
+    bool AnnotationLog::setTimeHeader(const std::string& timeHeader)
     {
         if(!m_hasRead || !m_hasHeader)
             return false;
@@ -113,8 +112,7 @@ namespace sereno
         if(timeCol == -1)
             return false;
 
-        m_timeIT = timeCol;
-        onSetTimeColumn();
+        setTimeInd(timeCol);
         return true;
     }
 

@@ -89,34 +89,39 @@ namespace sereno
 
     void AnnotationLogContainer::onParse()
     {
-        readTimeValues();
+        setTimeInd(m_timeIT);
     }
 
-    void AnnotationLogContainer::onSetTimeColumn()
+    bool AnnotationLogContainer::setTimeInd(int timeCol)
     {
-        readTimeValues();
-    }
+        //Check if we already have this time. If yes --> error
+        if(timeCol != m_timeIT)
+            if(std::binary_search(m_assignedHeaders.begin(), m_assignedHeaders.end(), timeCol))
+                return false;
 
-    void AnnotationLogContainer::readTimeValues()
-    {
+        int oldTime = m_timeIT; //save it to erase it from assigned headers
+        bool res = AnnotationLog::setTimeInd(timeCol);
+        if(!res)
+            return false;
+
         //Erase old header
-        if(m_curTimeHeader != -1)
+        if(oldTime >= 0)
         {
-            auto it = std::lower_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), m_curTimeHeader);
-            if(it != m_assignedHeaders.end()) //THIS SHOULD ALWAYS BE TRUE
+            auto it = std::lower_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), oldTime);
+            if(it != m_assignedHeaders.end() && *it == (uint32_t)oldTime) //THIS SHOULD ALWAYS BE TRUE
                 m_assignedHeaders.erase(it);
         }
 
-        m_curTimeHeader = getTimeColumn();
-
-        if(m_curTimeHeader != -1)
+        //Assign new header
+        if(m_timeIT >= 0)
         {
-            auto it = std::upper_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), m_curTimeHeader);
-            it = m_assignedHeaders.insert(it, m_curTimeHeader);
+            auto it = std::upper_bound(m_assignedHeaders.begin(), m_assignedHeaders.end(), m_timeIT);
+            it = m_assignedHeaders.insert(it, m_timeIT);
             m_time = getTimeValues();
         }
         else
             m_time.clear();
+        return true;
     }
 
     void AnnotationLogContainer::onUpdateHeaders(AnnotationLogComponent* component, const std::vector<int32_t>& oldHeaders)

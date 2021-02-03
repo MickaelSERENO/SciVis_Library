@@ -36,7 +36,7 @@ namespace sereno
             int32_t parseAnnotationPosition(std::shared_ptr<AnnotationPosition> annot);
 
             /** \brief  Get a map of all the registered annotation position and the associated read position.
-             * \return   all the parsed annotation positions and the corresponding positions*/
+             * \return   all the parsed annotation positions and the corresponding positions.*/
             const std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>>& getAnnotationPositions() const {return m_positions;}
 
             /** \brief  Get the positions to use from an AnnotationPosition view.
@@ -66,13 +66,11 @@ namespace sereno
             std::vector<float>& getParsedTime() {return m_time;}
 
             virtual void onParse();
-            virtual void onSetTimeColumn();
+            virtual bool setTimeInd(int32_t timeCol);
             virtual void onUpdateHeaders(AnnotationLogComponent* component, const std::vector<int32_t>& oldHeaders);
         private:
-            void readTimeValues();
             std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>> m_positions;
             std::vector<uint32_t> m_assignedHeaders;
-            int32_t               m_curTimeHeader = -1;
             std::vector<float>    m_time;
     };
 }
