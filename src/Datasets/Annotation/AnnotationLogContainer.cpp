@@ -60,6 +60,32 @@ namespace sereno
         return 0;
     }
 
+    void AnnotationLogContainer::removeAnnotationPosition(std::shared_ptr<AnnotationPosition> annot)
+    {
+        //Remove the positions
+        auto posIT = m_positions.find(annot);
+        if(posIT == m_positions.end())
+            return;
+
+        m_positions.erase(posIT);
+
+        //Remove the assigned headers
+        std::vector<int32_t> headers = annot->getHeaders();
+        for(auto h : headers)
+        {
+            if(h < 0)
+                continue;
+            for(auto it = m_assignedHeaders.begin(); it != m_assignedHeaders.end(); ++it)
+            {
+                if(*it == (uint32_t)h)
+                {
+                    m_assignedHeaders.erase(it);
+                    break;
+                }
+            }
+        }
+    }
+
     const std::vector<glm::vec3>* AnnotationLogContainer::getPositionsFromView(std::shared_ptr<AnnotationPosition> annot) const
     {
         auto it = m_positions.find(annot);

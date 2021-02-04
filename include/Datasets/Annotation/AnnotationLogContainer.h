@@ -35,6 +35,10 @@ namespace sereno
              * \return  0 on success, an error message otherwise. See "ANNOTATION_LOG_CONTAINER_ERROR" for more details*/
             int32_t parseAnnotationPosition(std::shared_ptr<AnnotationPosition> annot);
 
+            /** \brief  Remove an already registered annotation log position view
+             * \param annot the view to remove */
+            void removeAnnotationPosition(std::shared_ptr<AnnotationPosition> annot);
+
             /** \brief  Get a map of all the registered annotation position and the associated read position.
              * \return   all the parsed annotation positions and the corresponding positions.*/
             const std::map<std::shared_ptr<AnnotationPosition>, std::vector<glm::vec3>>& getAnnotationPositions() const {return m_positions;}
