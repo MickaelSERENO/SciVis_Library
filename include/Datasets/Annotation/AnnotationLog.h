@@ -139,7 +139,7 @@ namespace sereno
 
             /** \brief  Get the column indice associated with time data
              * \return   -1 if no time is available, the indice corresponding to time data otherwise */
-            int32_t getTimeColumn() const {return m_timeIT;}
+            int32_t getTimeInd() const {return m_timeIT;}
 
             /** \brief  Get the headers associated with this CSV.
              * \return  The headers associated with this CSV */
