@@ -198,6 +198,14 @@ namespace sereno
              * \param e the enable value */
             void enableVolumetricMask(bool e) {m_enableVolumetricMask = e;}
 
+            /** \brief  Get the depth clipping value to use for this SubDataset
+             * \return   the depth clipping value that should be between 0.0f (totally clipped) to 1.0f (no clipping to apply) */
+            float getDepthClipping() const {return m_depthClipping;}
+
+            /** \brief  Set the depth clipping value to use for this SubDaatset
+             * \param d the depth clipping values. The value shall be clamped between 0.0f and 1.0f */
+            void setDepthClipping(float d) {m_depthClipping = std::max(std::min(d, 1.0f), 0.0f);}
+
             /** \brief  Get the ID of this SUbDataset
              * \return   the subdataset ID */
             uint32_t getID() const {return m_id;}
@@ -222,6 +230,8 @@ namespace sereno
 #endif
             uint8_t* m_volumetricMask       = NULL;  /*!< The volumetric mask*/
             bool     m_enableVolumetricMask = false; /*!< Should we consider the SubDataset volumetric mask?*/
+
+            float    m_depthClipping        = 1.0f;  /*!< The depth clipping value to use for this SubDataset*/
         private:
             /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
              * \param id the new ID */
