@@ -30,12 +30,13 @@ namespace sereno
     {
         if(this != &sd)
         {
-            m_isValid   = sd.m_isValid;
-            m_rotation  = sd.m_rotation;
-            m_position  = sd.m_position;
-            m_scale     = sd.m_scale;
-            m_parent    = sd.m_parent;
-            m_name      = sd.m_name;
+            m_isValid       = sd.m_isValid;
+            m_rotation      = sd.m_rotation;
+            m_position      = sd.m_position;
+            m_scale         = sd.m_scale;
+            m_parent        = sd.m_parent;
+            m_name          = sd.m_name;
+            m_depthClipping = sd.m_depthClipping;
 
             //TODO copy that in a better way
             m_tf        = sd.m_tf;
