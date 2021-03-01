@@ -87,11 +87,17 @@ namespace sereno
             {
                 float mag = 0;
                 for(uint32_t i = 0; i < m_dim-1; i++)
-                {
-                    float _ind = std::clamp(ind[i], m_minClipping, m_maxClipping);
-                    mag += _ind*_ind;
-                }
+                    mag += ind[i]*ind[i];
                 mag = sqrt(mag)/(m_dim-1);
+
+                //clip values
+                if(mag < m_minClipping)
+                    mag = 0.0f;
+                else if(mag > m_maxClipping)
+                    mag = 1.0f;
+                else
+                    mag = (mag - m_minClipping)/(m_maxClipping - m_minClipping);
+
                 Color c = SciVis_computeColor(m_mode, mag);
                 for(int i = 0; i < 3; i++)
                     colOut[i] = std::min(255.0f, std::max(0.0f, 255.0f*c[i]));
