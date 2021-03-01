@@ -32,8 +32,14 @@ namespace sereno
 
             TF& operator=(const TF& copy)
             {
-                m_dim  = copy.m_dim;
-                m_mode = copy.m_mode;
+                if(this != &copy)
+                {
+                    m_dim             = copy.m_dim;
+                    m_mode            = copy.m_mode;
+                    m_currentTimestep = copy.m_currentTimestep;
+                    m_minClipping     = copy.m_minClipping;
+                    m_maxClipping     = copy.m_maxClipping;
+                }
 
                 return *this;
             }
@@ -55,7 +61,10 @@ namespace sereno
             {
                 float mag = 0;
                 for(uint32_t i = 0; i < m_dim; i++)
-                    mag += ind[i]*ind[i];
+                {
+                    float _ind = std::clamp(ind[i], m_minClipping, m_maxClipping);
+                    mag += _ind*_ind;
+                }
                 mag = sqrt(mag)/m_dim;
                 Color c = SciVis_computeColor(m_mode, mag);
                 for(int i = 0; i < 3; i++)
@@ -93,11 +102,32 @@ namespace sereno
             /** \brief Set the current timestep to apply to your data visualization
              * \param t the current timestep to apply. Must be positive. */
             void setCurrentTimestep(float t) {m_currentTimestep = t;}
+
+            /** \brief Set the clipping values of this transfer function
+             * \param min the minimum clipping value in the dimension format (between 0.0f and 1.0f). Default: 0.0f
+             * \param max the maximum clipping value in the dimension format (between 0.0f and 1.0f). Default: 1.0f.*/
+            void setClipping(float min, float max) 
+            {
+                m_minClipping = std::min(std::max(min, 0.0f), 1.0f);
+                m_maxClipping = std::min(std::max(max, 0.0f), 1.0f);
+                if(m_minClipping > m_maxClipping)
+                    std::swap(m_minClipping, m_maxClipping);
+            }
+
+            /** \brief Get the min clipping value to use to adapt the indexes correctly 
+             * \return The min clipping value in use*/
+            float getMinClipping() const {return m_minClipping;}
+
+            /** \brief Get the max clipping value to use to adapt the indexes correctly 
+             * \return The max clipping value in use*/
+            float getMaxClipping() const {return m_maxClipping;}
         protected:
             std::vector<bool> m_enabled;     /*!< m_enabled[ids] == true if enabled, false otherwise. Size: m_dim. */
             uint32_t  m_dim;                 /*!< The transfer function dimension*/
             ColorMode m_mode;                /*!< The color mode*/
             float     m_currentTimestep = 0; /*!< The current timestep*/
+            float     m_minClipping     = 0;
+            float     m_maxClipping     = 1;
     };
 
     /* \brief  Compute the transfer function texels. The dimension of the transfer function must be inferior at 1024
