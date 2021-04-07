@@ -26,6 +26,7 @@
 namespace sereno
 {
     class Dataset;
+    class SubDatasetGroup;
 
     /** \brief  Represent a dataset. Aims to be derived */
     class SubDataset
@@ -33,7 +34,7 @@ namespace sereno
         public:
             /** \brief  Constructor 
              * \param parent the parent Dataset
-             * \param name the SUbDataset name*/
+             * \param name the SubDataset name*/
             SubDataset(Dataset* parent, const std::string& name, uint32_t id);
 
             /** \brief Copy constructor
@@ -206,13 +207,25 @@ namespace sereno
              * \param d the depth clipping values. The value shall be clamped between 0.0f and 1.0f */
             void setDepthClipping(float d) {m_depthClipping = std::max(std::min(d, 1.0f), 0.0f);}
 
-            /** \brief  Get the ID of this SUbDataset
+            /** \brief  Get the ID of this SubDataset
              * \return   the subdataset ID */
             uint32_t getID() const {return m_id;}
             
             /** \brief  Get the model--world matrix
              * \return  the glm::mat4 associated */
             glm::mat4 getModelWorldMatrix() const;
+
+            /** \brief  Set the SubDatasetGroup linked to this SubDataset.
+             * \param group The SubDatasetGroup to consider. nullptr == no SubDatasetGroup to consider */
+            void setSubDatasetGroup(SubDatasetGroup* group);
+
+            /** \brief Get the SubDatasetGroup linked to this SubDataset 
+             * \return A valid pointer to the linked SubDatasetGroup. nullptr == no SubDatasetGroup linked */
+            SubDatasetGroup* getSubDatasetGroup() {return m_sdGroup;}
+
+            /** \brief Get the SubDatasetGroup linked to this SubDataset 
+             * \return A valid pointer to the linked SubDatasetGroup. nullptr == no SubDatasetGroup linked */
+            const SubDatasetGroup* getSubDatasetGroup() const {return m_sdGroup;}
         protected:
             bool        m_isValid        = false;              /*!< Is this dataset in a valid state ?*/
             Quaternionf m_rotation;                            /*!< The quaternion rotation*/
@@ -232,12 +245,15 @@ namespace sereno
             bool     m_enableVolumetricMask = false; /*!< Should we consider the SubDataset volumetric mask?*/
 
             float    m_depthClipping        = 1.0f;  /*!< The depth clipping value to use for this SubDataset*/
+
+            SubDatasetGroup* m_sdGroup = nullptr;
         private:
             /* \brief  Set the ID of this SubDataset. This method is mostly aimed at being called by the Dataset class.
              * \param id the new ID */
             void setID(uint32_t id) {m_id = id;}
 
         friend class Dataset;
+        friend class SubDatasetGroup;
     };
 }
 

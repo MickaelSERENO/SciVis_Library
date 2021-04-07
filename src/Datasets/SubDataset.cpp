@@ -1,5 +1,6 @@
 #include "Datasets/SubDataset.h"
 #include "Datasets/Dataset.h"
+#include "Datasets/SubDatasetGroup.h"
 #include <cstring>
 
 namespace sereno
@@ -62,6 +63,8 @@ namespace sereno
     {
         if(m_volumetricMask)
             free(m_volumetricMask);
+        if(m_sdGroup)
+            m_sdGroup->removeSubDataset(this);
     }
 
     AnnotationCanvas* SubDataset::emplaceAnnotationCanvas(uint32_t w, uint32_t h, float* position)
@@ -108,5 +111,21 @@ namespace sereno
         posMat = glm::scale(posMat, getScale());
 
         return posMat;
+    }
+
+    void SubDataset::setSubDatasetGroup(SubDatasetGroup* group)
+    {
+        if(m_sdGroup != group)
+        {
+            if(m_sdGroup != nullptr)
+            {
+                SubDatasetGroup* oldGroup = m_sdGroup;
+                m_sdGroup = nullptr;
+                oldGroup->removeSubDataset(this);
+            }
+            m_sdGroup = group;
+            if(m_sdGroup)
+                m_sdGroup->addSubDataset(this);
+        }
     }
 }
