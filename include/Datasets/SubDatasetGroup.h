@@ -30,6 +30,8 @@ namespace sereno
              * \param sd The SubDataset to consider 
              * \return true if yes, false otherwise */
             virtual bool isSpatiallyModifiable(SubDataset* sd) {return true;}
+
+            const std::list<SubDataset*>& getSubDatasets() {return m_subDatasets;}
         protected:
             /** \brief  Register a new SubDataset. This method is protected because it shall depends on the upper-class classification and data storage method
              * \param sd The SubDataset to register
@@ -46,6 +48,7 @@ namespace sereno
     {
         STACK_VERTICAL   = 0, /*!< Vertical */
         STACK_HORIZONTAL = 1, /*!< Horizontal */
+        STACK_END,
     };
 
     /** \brief  Base class for Subjective Views */
@@ -58,6 +61,27 @@ namespace sereno
 
             /** \brief  Pure virtual constructor to make the class abstract */
             virtual ~SubDatasetSubjectiveGroup() = 0;
+
+            /** \brief  Get the "original" SubDataset
+             * \return  a pointer to the original SubDataset */
+            SubDataset* getBase() {return m_base;}
+
+            /** \brief  Get the "original" SubDataset
+             * \return  a pointer to the original SubDataset */
+            const SubDataset* getBase() const {return m_base;}
+        protected:
+            SubDataset* m_base; /*!< The SubDataset serving as models for the others*/
+    };
+
+    class SubDatasetSubjectiveStackedGroup : public SubDatasetSubjectiveGroup
+    {
+        public:
+            /** \brief  Constructor
+             * \param base the original SubDataset acting as a "base" to the others */
+            SubDatasetSubjectiveStackedGroup(SubDataset* base);
+
+            /** \brief  Pure virtual constructor to make the class abstract */
+            virtual ~SubDatasetSubjectiveStackedGroup() = 0;
 
             /** \brief  Set the gap between subjective views (when stacked)
              * \param gap the gap distance (world-space distance) */
@@ -82,57 +106,25 @@ namespace sereno
             /** \brief  Get the stacking method of subjective views (when applied)
              * \return the stacking method to apply */
             StackingEnum getStackingMethod() const {return m_stack;}
-
-            SubDataset* getBase() {return m_base;}
-
-            const SubDataset* getBase() const {return m_base;}
         protected:
-            SubDataset*            m_base;                            /*!< The SubDataset serving as models for the others*/
             StackingEnum           m_stack          = STACK_VERTICAL; /*!< The stacking method to apply*/
             bool                   m_mergeSubjViews = false;          /*!< Are, when applied, stacked SubDatasets merged?*/
             float                  m_gap            = 0.20f;          /*!< The distance (world-space) between stacked SubDatasets.*/
     };
 
-    /** \brief  Group caracterizing Stacked Subjective views. */
-    class SubDatasetSubjectiveStackedGroup : public SubDatasetSubjectiveGroup
+    /** \brief  A subjective views group where each subjective view is composed of one stacked Subdataset and one linked subdataset */
+    class SubDatasetSubjectiveStackedLinkedGroup : public SubDatasetSubjectiveStackedGroup
     {
         public:
-            /** \brief  Constructor
-             * \param base the Original SubDataset serving as a base for the others */
-            SubDatasetSubjectiveStackedGroup(SubDataset* base);
-
-            virtual void updateSubDatasets();
-
-            /** \brief  Remove a registered subdataset.
-             * \param sd the SubDataset to remove. It sd is the base SubDataset, all subdatasets are removed from this group
-             * \return   true on success (the subdataset is found), false otherwise */
-            virtual bool removeSubDataset(SubDataset* sd);
-
-            /** \brief  Add a subjective view to stack with the base SubDataset
-             * \param sd The SubDataset to stack with the base.
-             * \return true on success (the SubDataset was not registered before), false otherwise */
-            bool addSubjectiveSubDataset(SubDataset* sd);
-
-            /** \brief Is the subdataset spatially modifiable?
-             * \param sd the subdataset to consider
-             * \return true if sd == getBase(), false otherwise*/
-            virtual bool isSpatiallyModifiable(SubDataset* sd);
-        protected:
-            std::list<SubDataset*> m_subjViews; /*!< The subjective views being stacked */
-    };
-
-    class SubDatasetSubjectiveLinkedGroup : public SubDatasetSubjectiveGroup
-    {
-        public:
-            SubDatasetSubjectiveLinkedGroup(SubDataset* base);
+            SubDatasetSubjectiveStackedLinkedGroup(SubDataset* base);
 
             virtual void updateSubDatasets();
 
             virtual bool removeSubDataset(SubDataset* sd);
 
             /** \brief  Add a subjective view to stack with the base SubDataset, and another one to link with this stacked subjective view
-             * \param sdStacked The SubDataset to stack with the base.
-             * \param sdLinked the SubDataset to link with sdStacked.
+             * \param sdStacked The SubDataset to stack with the base. sdStacked can be null. In this case, this class only relies on sdLinked which should be link to getBase()
+             * \param sdLinked the SubDataset to link with sdStacked or getBase(). If nullptr, no linked SubDataset is added
              * \return true on success (the SubDatasets were not registered before), false otherwise */
             bool addSubjectiveSubDataset(SubDataset* sdStacked, SubDataset* sdLinked);
 
