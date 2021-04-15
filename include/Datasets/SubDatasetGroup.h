@@ -22,7 +22,7 @@ namespace sereno
              * \param sd the subdataset to remove 
              * \return true on success, false of failure*/
             virtual bool removeSubDataset(SubDataset* sd);
-            
+
             /** \brief Update the properties of all registered SubDatasets based on the group property */
             virtual void updateSubDatasets() {}
 
@@ -137,6 +137,8 @@ namespace sereno
              * \param sd the subdataset to evaluate.
              * \return   The pair containing sd and its linked subdataset. pair.first == sdStacked, pair.second == sdLinked.*/
             std::pair<const SubDataset*, const SubDataset*> getLinkedSubDataset(SubDataset* sd) const;
+
+            const std::list<std::pair<SubDataset*, SubDataset*>>& getLinkedSubDatasets() const {return m_subjViews;}
 
             /** \brief Is the subdataset spatially modifiable?
              * \param sd the subdataset to consider
