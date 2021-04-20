@@ -23,7 +23,7 @@ namespace sereno
     bool SubDatasetGroup::addSubDataset(SubDataset* sd)
     {
         auto _sd = std::find(m_subDatasets.begin(), m_subDatasets.end(), sd);
-        if(_sd != m_subDatasets.end())
+        if(_sd == m_subDatasets.end())
         {
             m_subDatasets.push_back(sd);
             sd->setSubDatasetGroup(this);
