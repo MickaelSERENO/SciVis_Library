@@ -105,16 +105,19 @@ namespace sereno
         //If remove the base --> remove everything from this group
         if(sd == m_base)
         {
+            SubDataset* _base = m_base;
             m_base = nullptr;
-            SubDatasetGroup::removeSubDataset(m_base);
-            for(auto& it : m_subjViews)
+            SubDatasetGroup::removeSubDataset(_base);
+            for(auto it = m_subjViews.begin(); it != m_subjViews.end();)
             {
-                if(it.first)
-                    SubDatasetGroup::removeSubDataset(it.first);
-                if(it.second)
-                    SubDatasetGroup::removeSubDataset(it.second);
+                SubDataset* sd1 = it->first; //Save and remove BEFORE calling function because of domino effect between SubDataset and SubDatasetGroup
+                SubDataset* sd2 = it->second;
+                it = m_subjViews.erase(it);
+                if(sd1)
+                    SubDatasetGroup::removeSubDataset(sd1);
+                if(sd2)
+                    SubDatasetGroup::removeSubDataset(sd2);
             }
-            m_subjViews.clear();
             return true;
         }
 
@@ -124,11 +127,13 @@ namespace sereno
             //If yes, remove both the linked and the stacked subjective views
             if(it->second == sd || it->first == sd)
             {
-                if(it->first)
-                    SubDatasetGroup::removeSubDataset(it->first);
-                if(it->second)
-                    SubDatasetGroup::removeSubDataset(it->second);
+                SubDataset* sd1 = it->first; //Save and remove BEFORE calling function because of domino effect between SubDataset and SubDatasetGroup
+                SubDataset* sd2 = it->second;
                 m_subjViews.erase(it);
+                if(sd1)
+                    SubDatasetGroup::removeSubDataset(sd1);
+                if(sd2)
+                    SubDatasetGroup::removeSubDataset(sd2);
                 return true;
             }
         }
