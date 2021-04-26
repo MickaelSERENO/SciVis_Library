@@ -1,4 +1,5 @@
 #include "Datasets/SubDatasetGroup.h"
+#include <cstring>
 
 namespace sereno
 {
@@ -66,6 +67,21 @@ namespace sereno
             {
                 it.first->setScale(scale);
                 it.first->setGlobalRotate(rot);
+
+                if(it.second != nullptr)
+                {
+                    it.first->enableVolumetricMask(it.second->isVolumetricMaskEnabled());
+                    it.first->setDepthClipping(it.second->getDepthClipping());
+                    if(it.second->getTransferFunction() != nullptr)
+                        it.first->setTransferFunction(std::shared_ptr<TF>(it.second->getTransferFunction()->clone()));
+                    else
+                        it.first->setTransferFunction(nullptr);
+
+                    if(it.second->getDepthClipping() && it.second->getVolumetricMaskSize() == it.first->getVolumetricMaskSize())
+                    {
+                        memcpy(it.first->getVolumetricMask(), it.second->getVolumetricMask(), it.second->getVolumetricMaskSize());
+                    }
+                }
             }
         }
 

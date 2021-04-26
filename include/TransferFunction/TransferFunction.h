@@ -127,6 +127,11 @@ namespace sereno
             /** \brief Get the max clipping value to use to adapt the indexes correctly 
              * \return The max clipping value in use*/
             float getMaxClipping() const {return m_maxClipping;}
+
+            virtual TF* clone()
+            {
+                return new TF(*this);
+            }
         protected:
             std::vector<bool> m_enabled;     /*!< m_enabled[ids] == true if enabled, false otherwise. Size: m_dim. */
             uint32_t  m_dim;                 /*!< The transfer function dimension*/

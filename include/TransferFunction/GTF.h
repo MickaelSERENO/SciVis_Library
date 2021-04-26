@@ -101,6 +101,11 @@ namespace sereno
             /* \brief  Set the alpha max of the GTF
              * \param alphaMax the alpha max */
             void setAlphaMax(float alphaMax) {m_alphaMax = alphaMax;}
+
+            virtual TF* clone()
+            {
+                return new GTF(*this);
+            }
         private:
             float* m_scale    = NULL; /*!< The scaling factor of the GTF*/
             float* m_center   = NULL; /*!< The center of the GTF*/

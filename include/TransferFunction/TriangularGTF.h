@@ -146,6 +146,11 @@ namespace sereno
             void setAlphaMax(float alphaMax) {m_alphaMax = alphaMax;}
 
             virtual bool hasGradient() const {return true;}
+
+            virtual TF* clone()
+            {
+                return new TriangularGTF(*this);
+            }
         private:
             float* m_scale    = NULL; /*!< The scaling factor*/
             float* m_center   = NULL; /*!< The center*/
