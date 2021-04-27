@@ -17,6 +17,8 @@ namespace sereno
     class TF
     {
         public:
+            TF(){}
+
             /* \brief  Constructor of Basic class of transfer functions
              * \param dim the dimension of the transfer function
              * \param mode the color mode*/
@@ -34,6 +36,7 @@ namespace sereno
             {
                 if(this != &copy)
                 {
+                    m_enabled         = copy.m_enabled;
                     m_dim             = copy.m_dim;
                     m_mode            = copy.m_mode;
                     m_currentTimestep = copy.m_currentTimestep;
@@ -134,7 +137,7 @@ namespace sereno
             }
         protected:
             std::vector<bool> m_enabled;     /*!< m_enabled[ids] == true if enabled, false otherwise. Size: m_dim. */
-            uint32_t  m_dim;                 /*!< The transfer function dimension*/
+            uint32_t  m_dim             = 0; /*!< The transfer function dimension*/
             ColorMode m_mode;                /*!< The color mode*/
             float     m_currentTimestep = 0; /*!< The current timestep*/
             float     m_minClipping     = 0;

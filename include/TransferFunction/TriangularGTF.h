@@ -21,7 +21,7 @@ namespace sereno
                 }
             }
 
-            TriangularGTF(const TriangularGTF& copy) : TF(copy)
+            TriangularGTF(const TriangularGTF& copy)
             {
                 *this = copy;
             }

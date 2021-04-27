@@ -23,7 +23,7 @@ namespace sereno
                 }
             }
 
-            GTF(const GTF& copy) : TF(copy)
+            GTF(const GTF& copy)
             {
                 *this = copy;
             }

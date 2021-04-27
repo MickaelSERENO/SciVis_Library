@@ -125,7 +125,12 @@ namespace sereno
             }
             m_sdGroup = group;
             if(m_sdGroup)
-                m_sdGroup->addSubDataset(this);
+            {
+                const auto& subdatasets = m_sdGroup->getSubDatasets();
+                if(std::find(subdatasets.begin(), subdatasets.end(), this) != subdatasets.end() &&
+                   !m_sdGroup->addSubDataset(this))
+                    m_sdGroup = nullptr;
+            }
         }
     }
 }

@@ -27,9 +27,29 @@ namespace sereno
                     m_dim+=1;
             }
 
-            MergeTF(const MergeTF& copy) : TF(copy)
+            MergeTF(const MergeTF& copy)
             {
                 *this = copy;
+            }
+
+            MergeTF& operator=(const MergeTF& copy)
+            {
+                TF::operator=(copy);
+                if(this != &copy)
+                {
+                    if(copy.m_tf1 != nullptr)
+                        m_tf1 = std::shared_ptr<TF>(copy.m_tf1->clone());
+                    else
+                        m_tf1 = nullptr;
+
+                    if(copy.m_tf2 != nullptr)
+                        m_tf2 = std::shared_ptr<TF>(copy.m_tf2->clone());
+                    else
+                        m_tf2 = nullptr;
+
+                    m_t = copy.m_t;
+                }
+                return *this;
             }
 
             ~MergeTF() 
