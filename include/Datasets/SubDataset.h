@@ -86,6 +86,10 @@ namespace sereno
              * \return   The SubDataset name */
             const std::string& getName() const {return m_name;}
 
+            /** \brief  Set the SUbDataset name
+             * \param name the new name to use */
+            void setName(const std::string& name) {m_name = name;}
+
             /* \brief  Emplace a new canvas annotation
              * \param pxWidth the width in pixels of the annotation
              * \param pxHeight the height in pixels of the annotation
