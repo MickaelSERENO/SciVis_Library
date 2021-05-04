@@ -128,7 +128,7 @@ namespace sereno
                 minPos[j] = fmax(0.0f,  minPos[j]);
                 minPos[j] = fmin(CUBE_SIZE[j]-1, minPos[j]);
 
-                maxPos[j] = fmax(-1.0f, maxPos[j]);
+                maxPos[j] = fmax(0.0f, maxPos[j]);
                 maxPos[j] = fmin(CUBE_SIZE[j]-1, maxPos[j]);
             }
 
@@ -203,7 +203,7 @@ namespace sereno
             if(2*rasteredSpace[particuleX    + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle - 
                  rasteredSpace[CUBE_SIZE_X-1 + particuleY*CUBE_SIZE_X + particuleZ*CUBE_SIZE_X*CUBE_SIZE_Y].maxNbTriangle > 0)
             { 
-                for(int j = 0; j < CUBE_SIZE_X; j++)
+                for(int j = particuleX; j < CUBE_SIZE_X; j++)
                     rayCastAction(j);
             }
             else
