@@ -203,11 +203,16 @@ error:
 
         float* data = (float*)ptX.values[0].get();
 
+#ifdef _OPENMP
+        std::lock_guard<std::mutex> ompLock(ompMutex);
+#endif
+
 #if defined(_OPENMP)
-#pragma omp parallel
+        uint32_t* privateHisto = nullptr;
+#pragma omp parallel private(privateHisto)
         {
             //Initialize a private histogram
-            uint32_t* privateHisto = (uint32_t*)malloc(sizeof(uint32_t)*width);
+            privateHisto = (uint32_t*)malloc(sizeof(uint32_t)*width);
             for(uint32_t i=0; i<width; i++) 
                 privateHisto[i] = 0;
 

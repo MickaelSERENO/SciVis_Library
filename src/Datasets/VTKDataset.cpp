@@ -145,6 +145,10 @@ namespace sereno
                         //Scalar "min/max"
                         if(m_pointFieldDescs[i].nbValuePerTuple == 1)
                         {
+#ifdef _OPENMP
+                            std::lock_guard<std::mutex> ompLock(ompMutex);
+#endif
+
 #if defined(_OPENMP)
                             #pragma omp parallel for reduction(max:maxVal) reduction(min:minVal)
 #endif
@@ -165,6 +169,9 @@ namespace sereno
                         //Magnitude "min/max" (vector magnitude)
                         else
                         {
+#ifdef _OPENMP
+                            std::lock_guard<std::mutex> ompLock(ompMutex);
+#endif
 #if defined(_OPENMP)
                             #pragma omp parallel
 #endif
@@ -229,6 +236,10 @@ endNan:;
         gradientData->indices = indices;
 
         float maxGrad=0;
+
+#ifdef _OPENMP
+        std::lock_guard<std::mutex> ompLock(ompMutex);
+#endif
 
         for(uint32_t t = 0; t < m_nbTimesteps; t++)
         {
@@ -472,13 +483,18 @@ endNan:;
         const float xDiv = ptX.maxVal - ptX.minVal;
         uint8_t ptXFormat = VTKValueFormatInt(ptX.format);
 
+#ifdef _OPENMP
+        std::lock_guard<std::mutex> ompLock(ompMutex);
+#endif
+
         for(uint32_t t = 0; t < ptX.values.size(); t++)
         {
 #if defined(_OPENMP)
-#pragma omp parallel
+            uint32_t* privateHisto = nullptr;
+#pragma omp parallel private(privateHisto)
             {
                 //Initialize a private histogram
-                uint32_t* privateHisto = (uint32_t*)malloc(sizeof(uint32_t)*width);
+                privateHisto = (uint32_t*)malloc(sizeof(uint32_t)*width);
                 for(uint32_t i=0; i<width; i++) 
                     privateHisto[i] = 0;
 
@@ -489,7 +505,10 @@ endNan:;
                     for(uint32_t i = 0; i < ptX.nbTuples; i++)
                     {
                         float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat, ptX.format);
-                        uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
+                        if(std::isnan(xVal))
+                            continue;
+                        float pos = (xVal-ptX.minVal)/xDiv;
+                        uint32_t x = MIN(width*pos, width-1);
                         privateHisto[x]++;
                     }
                 } 
@@ -505,6 +524,8 @@ endNan:;
                             float val = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                             xVal = val*val;
                         }
+                        if(std::isnan(xVal))
+                            continue;
                         xVal = sqrt(xVal);
 
                         uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
@@ -528,6 +549,8 @@ endNan:;
                 for(uint32_t i = 0; i < ptX.nbTuples; i++)
                 {
                     float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat, ptX.format);
+                    if(std::isnan(xVal))
+                        continue;
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
                     output[x]++;
                 }
@@ -543,6 +566,8 @@ endNan:;
                         float val = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
+                    if(std::isnan(xVal))
+                        continue;
                     xVal = sqrt(xVal);
 
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);

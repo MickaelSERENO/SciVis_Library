@@ -3,6 +3,7 @@
 
 #include "Datasets/SubDataset.h"
 #include "Datasets/PointFieldDesc.h"
+#include "sciVisUtils.h"
 #include <vector>
 #include <cstdint>
 #include <thread>

@@ -86,9 +86,14 @@ namespace sereno
             void computeColor(float* ind, uint8_t* colOut) const
             {
                 float mag = 0;
+                uint32_t nbDim = 0;
                 for(uint32_t i = 0; i < m_dim-1; i++)
-                    mag += ind[i]*ind[i];
-                mag = sqrt(mag)/(m_dim-1);
+                    if(m_scale[i] != 0)
+                    {
+                        mag += ind[i]*ind[i];
+                        nbDim++;
+                    }
+                mag = sqrt(mag)/nbDim;
 
                 //clip values
                 if(mag < m_minClipping)

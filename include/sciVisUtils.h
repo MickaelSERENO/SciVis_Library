@@ -4,6 +4,7 @@
 #include <strings.h>
 #include <cstring>
 #include <vector>
+#include <mutex>
 
 //Colors for printf
 #ifndef RED
@@ -62,6 +63,11 @@
 #ifndef WARNING
 #define WARNING (std::cout << BOLD YEL "Warning : " RESET GRN  << __FILENAME__ << ":" STR(__LINE__) RESET " ")
 #endif
+
+namespace sereno
+{
+    extern std::mutex ompMutex;
+}
 
 namespace serenoSciVis
 {
