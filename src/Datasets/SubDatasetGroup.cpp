@@ -71,13 +71,13 @@ namespace sereno
                 if(it.second != nullptr)
                 {
                     it.first->enableVolumetricMask(it.second->isVolumetricMaskEnabled());
-                    it.first->setDepthClipping(it.second->getDepthClipping());
+                    it.first->setDepthClipping(it.second->getMinDepthClipping(), it.second->getMaxDepthClipping());
                     if(it.second->getTransferFunction() != nullptr)
                         it.first->setTransferFunction(std::shared_ptr<TF>(it.second->getTransferFunction()->clone()));
                     else
                         it.first->setTransferFunction(nullptr);
 
-                    if(it.second->getDepthClipping() && it.second->getVolumetricMaskSize() == it.first->getVolumetricMaskSize())
+                    if(it.second->isVolumetricMaskEnabled() && it.second->getVolumetricMaskSize() == it.first->getVolumetricMaskSize())
                     {
                         memcpy(it.first->getVolumetricMask(), it.second->getVolumetricMask(), it.second->getVolumetricMaskSize());
                     }

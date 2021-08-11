@@ -203,13 +203,18 @@ namespace sereno
              * \param e the enable value */
             void enableVolumetricMask(bool e) {m_enableVolumetricMask = e;}
 
-            /** \brief  Get the depth clipping value to use for this SubDataset
-             * \return   the depth clipping value that should be between 0.0f (totally clipped) to 1.0f (no clipping to apply) */
-            float getDepthClipping() const {return m_depthClipping;}
+            /** \brief  Get the min depth clipping value to use for this SubDataset
+             * \return  the min depth clipping value that should be between 0.0f (totally clipped) to 1.0f (no clipping to apply) */
+            float getMinDepthClipping() const {return m_minDepthClipping;}
 
-            /** \brief  Set the depth clipping value to use for this SubDaatset
-             * \param d the depth clipping values. The value shall be clamped between 0.0f and 1.0f */
-            void setDepthClipping(float d) {m_depthClipping = std::max(std::min(d, 1.0f), 0.0f);}
+            /** \brief  Get the min depth clipping value to use for this SubDataset
+             * \return  the min depth clipping value that should be between 0.0f (totally clipped) to 1.0f (no clipping to apply) */
+            float getMaxDepthClipping() const {return m_maxDepthClipping;}
+
+            /** \brief  Set the depth clipping value to use for this SubDataset. Values shall be clamped between 0.0f and 1.0f 
+             * \param minD the min depth clipping values.
+             * \param maxD the max depth clipping values.*/
+            void setDepthClipping(float minD, float maxD) {m_minDepthClipping = std::max(std::min(minD, 1.0f), 0.0f); m_maxDepthClipping = std::max(std::min(maxD, 1.0f), 0.0f);}
 
             /** \brief  Get the ID of this SubDataset
              * \return   the subdataset ID */
@@ -248,7 +253,8 @@ namespace sereno
             uint8_t* m_volumetricMask       = NULL;  /*!< The volumetric mask*/
             bool     m_enableVolumetricMask = false; /*!< Should we consider the SubDataset volumetric mask?*/
 
-            float    m_depthClipping        = 1.0f;  /*!< The depth clipping value to use for this SubDataset*/
+            float    m_minDepthClipping        = 0.0f;  /*!< The min depth clipping value to use for this SubDataset*/
+            float    m_maxDepthClipping        = 1.0f;  /*!< The max depth clipping value to use for this SubDataset*/
 
             SubDatasetGroup* m_sdGroup = nullptr;
         private:
