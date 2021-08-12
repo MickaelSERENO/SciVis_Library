@@ -1,5 +1,6 @@
 #include "Datasets/VTKDataset.h"
 #include <omp.h>
+#include <filesystem>
 
 #ifndef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -51,6 +52,14 @@ namespace sereno
         
         m_minPos = glm::vec3(-0.5f, -0.5f, -0.5f);
         m_maxPos = glm::vec3(0.5f, 0.5f, 0.5f);
+        onAddTimestep();
+
+        //Ask to read the meta data
+        std::filesystem::path path(parser->getPath());
+        std::string           dir          = path.parent_path();
+        std::string           filename     = path.stem();
+        std::filesystem::path metadataPath(dir+"/Metadata/"+filename+".json");
+        addMetaData(metadataPath);
     }
 
     VTKDataset::~VTKDataset()
@@ -97,7 +106,7 @@ namespace sereno
 
         //Add the correctely parsed timestep
         m_timesteps.push_back({parser, ptFieldValues, cellFieldValues});
-        m_nbTimesteps++;
+        onAddTimestep();
         return true;
     }
 
@@ -285,6 +294,8 @@ endNan:;
                                         float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
                                         float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
                                         float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+
+                                        gradZ = 0.0f;
                                         
                                         df[3*l+0] = gradX/(ptFieldValue.maxVal-ptFieldValue.minVal);
                                         df[3*l+1] = gradY/(ptFieldValue.maxVal-ptFieldValue.minVal);
@@ -303,6 +314,8 @@ endNan:;
                                         float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
                                         float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
                                         float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+
+                                        gradZ = 0.0f;
 
                                         df[3*l+0] = gradX;
                                         df[3*l+1] = gradY;
@@ -365,6 +378,8 @@ endNan:;
                                 float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
                                 float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
 
+                                gradZ = 0.0f;
+
                                 gradX = gradX/(ptFieldValue.maxVal-ptFieldValue.minVal);
                                 gradY = gradY/(ptFieldValue.maxVal-ptFieldValue.minVal);
                                 gradZ = gradZ/(ptFieldValue.maxVal-ptFieldValue.minVal);
@@ -402,6 +417,7 @@ endNan:;
                                 float gradX = (x2-x1)/(2.0f*ptsDesc.spacing[0]);
                                 float gradY = (y2-y1)/(2.0f*ptsDesc.spacing[1]);
                                 float gradZ = (z2-z1)/(2.0f*ptsDesc.spacing[2]);
+                                gradZ = 0.0f;
 
                                 float gradMag = gradX*gradX + gradY*gradY + gradZ*gradZ;
                                 gradMag = sqrt(gradMag);

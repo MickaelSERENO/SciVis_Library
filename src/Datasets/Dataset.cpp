@@ -1,4 +1,5 @@
 #include "Datasets/Dataset.h"
+#include <filesystem>
 #include <utility>
 #include <algorithm>
 
@@ -39,6 +40,23 @@ namespace sereno
         return -1;
     }
 
+    bool Dataset::addMetaData(const std::string& filePath)
+    {
+        if(!std::filesystem::exists(filePath))
+        {
+            WARNING << "The file " << filePath << " does not exist. Skipping\n";
+            return false;
+        }
+        m_metadata = DatasetMetadata(filePath);
+        return true;
+    }
+
+    void Dataset::onAddTimestep()
+    {
+        m_nbTimesteps++;
+        if(m_nbTimesteps > m_metadata.perTimestepMetadata.size())
+            m_metadata.perTimestepMetadata.emplace_back();
+    }
 
     DatasetGradient* Dataset::getOrComputeGradient(const std::vector<uint32_t>& indices)
     {

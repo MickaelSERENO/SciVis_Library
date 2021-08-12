@@ -3,6 +3,7 @@
 
 #include "Datasets/SubDataset.h"
 #include "Datasets/PointFieldDesc.h"
+#include "Datasets/DatasetMetadata.h"
 #include "sciVisUtils.h"
 #include <vector>
 #include <cstdint>
@@ -49,6 +50,11 @@ namespace sereno
 
             /** \brief  Destructor */
             virtual ~Dataset();
+
+            /*** \brief Add metadata associated to this Dataset
+             * \param filePath the metadata filepath to look at
+             * \return true on success, false otherwise*/
+            bool addMetaData(const std::string& filePath);
 
             /* \brief  Get the SubDatasets registered
              * \return  The array of SubDatasets registered */
@@ -214,6 +220,10 @@ namespace sereno
             /** \brief  Get the number of registered timesteps in this dataset
              * \return  The number of timesteps that this dataset contains */
             uint32_t getNbTimesteps() const {return m_nbTimesteps;}
+
+            /** \brief  Get the metadata associated with this Dataset
+             * \return   The metadata associated with this dataset*/
+            const DatasetMetadata& getMetadata() const {return m_metadata;}
         protected:
             /** \brief  Computes and stores the gradient of the field considering a subset of the field parameters
              * \param indices the transfer
@@ -229,6 +239,9 @@ namespace sereno
                 dataset->m_isValid = isValid;
             }
 
+            /** \brief Method to call each time a dataset adds a new timestep */
+            void onAddTimestep();
+
             std::vector<SubDataset*>     m_subDatasets;     /*!< Array of sub datasets*/
             std::vector<PointFieldDesc>  m_pointFieldDescs; /*!< Array of point field data*/
             std::vector<DatasetGradient*> m_grads;          /*!< The gradient array*/
@@ -239,6 +252,8 @@ namespace sereno
             glm::vec3 m_maxPos; /*!< The maximum position of the bounding box*/
 
             uint32_t m_nbTimesteps = 0; /*!< The number of registered timesteps*/
+
+            DatasetMetadata m_metadata; /*!< The metadata associated with this Dataset */
     };
 }
 

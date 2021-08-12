@@ -66,6 +66,7 @@ find_package(PkgConfig REQUIRED)
 PKG_CHECK_MODULES(VTKPARSER REQUIRED serenoVTKParser)
 PKG_CHECK_MODULES(MATH      REQUIRED serenoMath)
 PKG_CHECK_MODULES(GLM       REQUIRED glm)
+PKG_CHECK_MODULES(JSONCPP   REQUIRED jsoncpp)
 
 #Check OpenMP
 find_package(OpenMP)
@@ -91,8 +92,8 @@ if(COMPILE_OPENCL)
     MESSAGE(STATUS "Compiling with OPENCL support")
 endif()
 
-target_compile_options(serenoSciVis PUBLIC ${VTKPARSER_CFLAGS} ${GLM_CFLAGS}  ${MATH_CFLAGS})
-target_link_libraries(serenoSciVis PUBLIC ${VTKPARSER_LDFLAGS} ${GLM_LDFLAGS} ${MATH_LDFLAGS} -lm)
+target_compile_options(serenoSciVis PUBLIC ${VTKPARSER_CFLAGS} ${GLM_CFLAGS}  ${MATH_CFLAGS} ${JSONCPP_CFLAGS})
+target_link_libraries(serenoSciVis PUBLIC ${VTKPARSER_LDFLAGS} ${GLM_LDFLAGS} ${MATH_LDFLAGS} ${JSONCPP_LDFLAGS} -lm)
 
 #Add include directory
 target_include_directories(serenoSciVis PUBLIC
