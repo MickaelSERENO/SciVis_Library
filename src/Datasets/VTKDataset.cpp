@@ -635,9 +635,13 @@ endNan:;
                     for(uint32_t i = 0; i < ptX.nbTuples; i++)
                     {
                         float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat, ptX.format);
+                        if(std::isnan(xVal))
+                            continue;
                         uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                         float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat, ptY.format);
+                        if(std::isnan(yVal))
+                            continue;
                         uint32_t y = MIN(height*(yVal-ptY.minVal)/yDiv, height-1);
 
                         privateHisto[y*width + x]+=1;
@@ -650,6 +654,8 @@ endNan:;
                     for(uint32_t i = 0; i < ptX.nbValuePerTuple; i++)
                     {
                         float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat, ptX.format);
+                        if(std::isnan(xVal))
+                            continue;
                         uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                         //Take the magnitude
@@ -659,6 +665,8 @@ endNan:;
                             float val = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                             yVal = val*val;
                         }
+                        if(std::isnan(yVal))
+                            continue;
                         uint32_t y = MIN(height*(sqrt(yVal) - ptY.minVal)/yDiv, height-1);
 
                         privateHisto[y*width + x]++;
@@ -676,9 +684,13 @@ endNan:;
                             float val = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                             xVal = val*val;
                         }
+                        if(std::isnan(xVal))
+                            continue;
                         xVal = sqrt(xVal);
 
                         float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat, ptY.format);
+                        if(std::isnan(yVal))
+                            continue;
                         uint32_t x = MIN((xVal - ptX.minVal)/xDiv, width-1);
                         uint32_t y = MIN((yVal - ptY.minVal)/yDiv, height-1);
                         privateHisto[y*width + x]++;
@@ -696,6 +708,8 @@ endNan:;
                             float val = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                             xVal = val*val;
                         }
+                        if(std::isnan(xVal))
+                            continue;
                         xVal = sqrt(xVal);
 
                         float yVal = 0.0;
@@ -704,6 +718,8 @@ endNan:;
                             float val = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                             yVal = val*val;
                         }
+                        if(std::isnan(yVal))
+                            continue;
                         yVal = sqrt(yVal);
 
                         uint32_t x = MIN((xVal - ptX.minVal)/xDiv, width-1);
@@ -728,9 +744,13 @@ endNan:;
                 for(uint32_t i = 0; i < ptX.nbTuples; i++)
                 {
                     float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat, ptX.format);
+                    if(std::isnan(xVal))
+                        continue;
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                     float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat, ptY.format);
+                    if(std::isnan(yVal))
+                        continue;
                     uint32_t y = MIN(height*(yVal-ptY.minVal)/yDiv, height-1);
 
                     output[y*width + x]++;
@@ -742,6 +762,8 @@ endNan:;
                 for(uint32_t i = 0; i < ptX.nbValuePerTuple; i++)
                 {
                     float xVal = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat, ptX.format);
+                    if(std::isnan(xVal))
+                        continue;
                     uint32_t x = MIN(width*(xVal-ptX.minVal)/xDiv, width-1);
 
                     //Take the magnitude
@@ -751,6 +773,8 @@ endNan:;
                         float val = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                         yVal = val*val;
                     }
+                    if(std::isnan(yVal))
+                        continue;
                     uint32_t y = MIN(height*(sqrt(yVal) - ptY.minVal)/yDiv, height-1);
 
                     output[y*width + x]++;
@@ -767,9 +791,13 @@ endNan:;
                         float val = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
+                    if(std::isnan(xVal))
+                        continue;
                     xVal = sqrt(xVal);
 
                     float yVal = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat, ptY.format);
+                    if(std::isnan(yVal))
+                        continue;
                     uint32_t x = MIN((xVal - ptX.minVal)/xDiv, width-1);
                     uint32_t y = MIN((yVal - ptY.minVal)/yDiv, height-1);
                     output[y*width + x]++;
@@ -786,6 +814,8 @@ endNan:;
                         float val = readParsedVTKValue<float>((uint8_t*)ptX.values[t].get() + i*ptXFormat*ptX.nbValuePerTuple + k*ptXFormat, ptX.format);
                         xVal = val*val;
                     }
+                    if(std::isnan(xVal))
+                        continue;
                     xVal = sqrt(xVal);
 
                     float yVal = 0.0;
@@ -794,6 +824,8 @@ endNan:;
                         float val = readParsedVTKValue<float>((uint8_t*)ptY.values[t].get() + i*ptYFormat*ptY.nbValuePerTuple + k*ptYFormat, ptY.format);
                         yVal = val*val;
                     }
+                    if(std::isnan(yVal))
+                        continue;
                     yVal = sqrt(yVal);
 
                     uint32_t x = MIN((xVal - ptX.minVal)/xDiv, width-1);

@@ -108,8 +108,8 @@ namespace sereno
             StackingEnum getStackingMethod() const {return m_stack;}
         protected:
             StackingEnum           m_stack          = STACK_VERTICAL; /*!< The stacking method to apply*/
-            bool                   m_mergeSubjViews = false;          /*!< Are, when applied, stacked SubDatasets merged?*/
-            float                  m_gap            = 0.20f;          /*!< The distance (world-space) between stacked SubDatasets.*/
+            bool                   m_mergeSubjViews = true;           /*!< Are, when applied, stacked SubDatasets merged?*/
+            float                  m_gap            = 0.10f;          /*!< The distance (world-space) between stacked SubDatasets.*/
     };
 
     /** \brief  A subjective views group where each subjective view is composed of one stacked Subdataset and one linked subdataset */
